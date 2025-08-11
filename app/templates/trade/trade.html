@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <ul class="nav nav-tabs nav-fill mb-3" id="trade-tabs" role="tablist">
+            <li class="nav-item" role="presentation"><a data-mdb-tab-init class="nav-link active" href="#stock-tab-pane">Stock</a></li>
+            <li class="nav-item" role="presentation"><a data-mdb-tab-init class="nav-link" href="#option-tab-pane">Single Option</a></li>
+            <li class="nav-item" role="presentation"><a data-mdb-tab-init class="nav-link" href="#vertical-tab-pane">Vertical Spread</a></li>
+            <li class="nav-item" role="presentation"><a data-mdb-tab-init class="nav-link" href="#condor-tab-pane">Iron Condor</a></li>
+        </ul>
+    </div>
+    <div class="card-body">
+        <div class="tab-content" id="trade-tabs-content">
+
+            <div class="tab-pane fade show active" id="stock-tab-pane" role="tabpanel">
+                <h4>Stock Order</h4>
+                <form method="POST" action="{{ url_for('trade.trading_page') }}">
+                    {{ stock_form.hidden_tag() }}
+                    <div class="row"><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ stock_form.symbol(class="form-control") }}{{ stock_form.symbol.label(class="form-label") }}</div></div><div class="col-md-6 mb-4">{{ stock_form.side(class="form-control") }}</div></div>
+                    <div class="row"><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ stock_form.quantity(class="form-control") }}{{ stock_form.quantity.label(class="form-label") }}</div></div><div class="col-md-6 mb-4">{{ stock_form.duration(class="form-control") }}</div></div>
+                    <div class="row"><div class="col-md-12 mb-4">{{ stock_form.order_type(class="form-control", id="stock-order_type") }}</div></div>
+                    <div class="row" id="stock_price_fields"><div class="col-md-6 mb-4" id="stock_limit_price_div"><div data-mdb-input-init class="form-outline">{{ stock_form.limit_price(class="form-control") }}{{ stock_form.limit_price.label(class="form-label") }}</div></div><div class="col-md-6 mb-4" id="stock_stop_price_div"><div data-mdb-input-init class="form-outline">{{ stock_form.stop_price(class="form-control") }}{{ stock_form.stop_price.label(class="form-label") }}</div></div></div>
+                    <button type="submit" name="submit_stock" class="btn btn-primary">Preview Order</button>
+                </form>
+            </div>
+
+            <div class="tab-pane fade" id="option-tab-pane" role="tabpanel">
+                <h4>Single Option Order</h4>
+                <p class="small text-muted">Feature to fetch option chains and symbols will be added later.</p>
+                <form method="POST" action="{{ url_for('trade.trading_page') }}">
+                    {{ option_form.hidden_tag() }}
+                    <div class="row"><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ option_form.underlying_symbol(class="form-control") }}{{ option_form.underlying_symbol.label(class="form-label") }}</div></div></div>
+                    <div class="row"><div class="col-md-12 mb-4"><div data-mdb-input-init class="form-outline">{{ option_form.option_symbol(class="form-control") }}{{ option_form.option_symbol.label(class="form-label") }}</div></div></div>
+                    <div class="row"><div class="col-md-6 mb-4">{{ option_form.side(class="form-control") }}</div><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ option_form.quantity(class="form-control") }}{{ option_form.quantity.label(class="form-label") }}</div></div></div>
+                    <div class="row"><div class="col-md-6 mb-4">{{ option_form.order_type(class="form-control") }}</div><div class="col-md-6 mb-4">{{ option_form.duration(class="form-control") }}</div></div>
+                    <div class="row"><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ option_form.limit_price(class="form-control") }}{{ option_form.limit_price.label(class="form-label") }}</div></div></div>
+                    <button type="submit" name="submit_option" class="btn btn-primary">Preview Option Order</button>
+                </form>
+            </div>
+
+            <div class="tab-pane fade" id="vertical-tab-pane" role="tabpanel">
+                <h4>Vertical Spread Order</h4>
+                <form method="POST" action="{{ url_for('trade.trading_page') }}">
+                    {{ vertical_form.hidden_tag() }}
+                    <label class="form-label" for="vertical-underlying_symbol">Underlying Symbol</label>
+                    <div class="input-group mb-4">
+                        {{ vertical_form.underlying_symbol(class="form-control") }}
+                        <button class="btn btn-outline-primary" type="button" id="vertical-fetch-expirations-btn" data-mdb-ripple-init>Fetch Dates</button>
+                    </div>
+                    <div class="row"><div class="col-md-6 mb-4">{{ vertical_form.expiration_date(class="form-control") }}</div><div class="col-md-6 mb-4">{{ vertical_form.spread_type(class="form-control") }}</div></div>
+                    <div class="row"><div class="col-md-6 mb-4">{{ vertical_form.credit_debit(class="form-control") }}</div></div>
+                    <div class="row"><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ vertical_form.strike_short(class="form-control") }}{{ vertical_form.strike_short.label(class="form-label") }}</div></div><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ vertical_form.strike_long(class="form-control") }}{{ vertical_form.strike_long.label(class="form-label") }}</div></div></div>
+                    <div class="row"><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ vertical_form.quantity(class="form-control") }}{{ vertical_form.quantity.label(class="form-label") }}</div></div><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ vertical_form.limit_price(class="form-control") }}{{ vertical_form.limit_price.label(class="form-label") }}</div></div></div>
+                    <button type="submit" name="submit_vertical" class="btn btn-primary">Preview Spread Order</button>
+                </form>
+            </div>
+
+            <div class="tab-pane fade" id="condor-tab-pane" role="tabpanel">
+                <h4>Iron Condor Order</h4>
+                 <form method="POST" action="{{ url_for('trade.trading_page') }}">
+                     {{ condor_form.hidden_tag() }}
+                     <label class="form-label" for="condor-underlying_symbol">Underlying Symbol</label>
+                     <div class="input-group mb-4">
+                        {{ condor_form.underlying_symbol(class="form-control") }}
+                        <button class="btn btn-outline-primary" type="button" id="condor-fetch-expirations-btn" data-mdb-ripple-init>Fetch Dates</button>
+                     </div>
+                     <div class="row"><div class="col-md-6 mb-4">{{ condor_form.expiration_date(class="form-control") }}</div></div>
+                     <div class="row"><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ condor_form.long_put_strike(class="form-control") }}{{ condor_form.long_put_strike.label(class="form-label") }}</div></div><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ condor_form.short_put_strike(class="form-control") }}{{ condor_form.short_put_strike.label(class="form-label") }}</div></div></div>
+                     <div class="row"><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ condor_form.short_call_strike(class="form-control") }}{{ condor_form.short_call_strike.label(class="form-label") }}</div></div><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ condor_form.long_call_strike(class="form-control") }}{{ condor_form.long_call_strike.label(class="form-label") }}</div></div></div>
+                     <div class="row"><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ condor_form.quantity(class="form-control") }}{{ condor_form.quantity.label(class="form-label") }}</div></div><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ condor_form.limit_price(class="form-control") }}{{ condor_form.limit_price.label(class="form-label") }}</div></div></div>
+                     <button type="submit" name="submit_condor" class="btn btn-primary">Preview Condor Order</button>
+                 </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // --- Script for stock order form (unchanged) ---
+    const stockOrderTypeSelect = document.getElementById('stock-order_type');
+    if (stockOrderTypeSelect) {
+        const stockLimitPriceDiv = document.getElementById('stock_limit_price_div');
+        const stockStopPriceDiv = document.getElementById('stock_stop_price_div');
+        function toggleStockPriceFields() {
+            const selectedType = stockOrderTypeSelect.value;
+            stockLimitPriceDiv.style.display = (selectedType === 'limit' || selectedType === 'stop_limit') ? 'block' : 'none';
+            stockStopPriceDiv.style.display = (selectedType === 'stop' || selectedType === 'stop_limit') ? 'block' : 'none';
+        }
+        stockOrderTypeSelect.addEventListener('change', toggleStockPriceFields);
+        toggleStockPriceFields();
+    }
+
+    // --- ADDED: Script for fetching option expirations ---
+    function setupExpirationFetcher(formPrefix) {
+        const symbolInput = document.getElementById(`${formPrefix}-underlying_symbol`);
+        const fetchBtn = document.getElementById(`${formPrefix}-fetch-expirations-btn`);
+        const expirationSelect = document.getElementById(`${formPrefix}-expiration_date`);
+
+        if (!fetchBtn || !symbolInput || !expirationSelect) return;
+
+        fetchBtn.addEventListener('click', function() {
+            const symbol = symbolInput.value.trim().toUpperCase();
+            if (!symbol) {
+                alert('Please enter an underlying symbol first.');
+                return;
+            }
+
+            expirationSelect.innerHTML = '<option value="">Loading...</option>';
+            expirationSelect.disabled = true;
+
+            fetch(`/get_expirations/${symbol}`)
+                .then(response => response.json())
+                .then(data => {
+                    expirationSelect.innerHTML = ''; // Clear loading/old options
+                    if (data.error) {
+                        expirationSelect.innerHTML = `<option value="">${data.error}</option>`;
+                    } else if (data.dates && data.dates.length > 0) {
+                        expirationSelect.innerHTML = '<option value="">-- Select an Expiration --</option>';
+                        data.dates.forEach(date => {
+                            const option = document.createElement('option');
+                            option.value = date;
+                            option.textContent = date;
+                            expirationSelect.appendChild(option);
+                        });
+                    } else {
+                        expirationSelect.innerHTML = '<option value="">No dates found</option>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching expiration dates:', error);
+                    expirationSelect.innerHTML = '<option value="">Error fetching dates</option>';
+                })
+                .finally(() => {
+                    expirationSelect.disabled = false;
+                });
+        });
+    }
+
+    // Initialize the fetcher for both the Vertical Spread and Iron Condor forms
+    setupExpirationFetcher('vertical');
+    setupExpirationFetcher('condor');
+});
+</script>
+{% endblock %}

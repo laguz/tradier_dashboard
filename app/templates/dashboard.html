@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="mb-4">
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between p-md-1">
+                        <div>
+                            <p class="mb-0">Total Portfolio Value</p>
+                            <h2 class="mb-0">${{ "%.2f"|format(kpis.get('total_equity', 0) | float) }}</h2>
+                        </div>
+                        <div class="align-self-center"><i class="fas fa-wallet fa-3x text-primary"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card text-white bg-{{'success' if kpis.get('day_pl', 0) | float >= 0 else 'danger'}}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between p-md-1">
+                        <div>
+                            <p class="mb-0">Day's Gain/Loss</p>
+                            <h2 class="mb-0">${{ "%.2f"|format(kpis.get('day_pl', 0) | float) }}</h2>
+                        </div>
+                        <div class="align-self-center"><i class="fas fa-arrow-{{'up' if kpis.get('day_pl', 0) | float >= 0 else 'down'}} fa-3x"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between p-md-1">
+                        <div>
+                            <p class="mb-0">Total Gain/Loss</p>
+                            <h2 class="mb-0 text-{{'success' if kpis.get('unrealized_pl', 0) | float >= 0 else 'danger'}}">${{ "%.2f"|format(kpis.get('unrealized_pl', 0) | float) }}</h2>
+                        </div>
+                        <div class="align-self-center"><i class="fas fa-chart-pie fa-3x text-warning"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between p-md-1">
+                        <div>
+                            <p class="mb-0">Buying Power</p>
+                            <h2 class="mb-0">${{ "%.2f"|format(kpis.get('total_cash', 0) | float) }}</h2>
+                        </div>
+                        <div class="align-self-center"><i class="fas fa-dollar-sign fa-3x text-info"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% if positions %}
+<section>
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header">Current Positions</div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>Symbol</th>
+                                    <th>Quantity</th>
+                                    <th>Unit Cost</th>
+                                    <th>Cost Basis</th>
+                                    <th>Market Value</th>
+                                    <th>Total Gain/Loss</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pos in positions %}
+                                <tr>
+                                    <td><strong>{{ pos.symbol }}</strong></td>
+                                    <td>{{ "%.2f"|format(pos.quantity | float) }}</td>
+                                    <td>${{ "%.2f"|format(pos.unit_cost | float) }}</td>
+                                    <td>${{ "%.2f"|format(pos.cost_basis | float) }}</td>
+                                    <td>${{ "%.2f"|format(pos.market_value | float) }}</td>
+                                    <td class="text-{{'success' if pos.unrealized_pl | float >= 0 else 'danger'}}">
+                                        ${{ "%.2f"|format(pos.unrealized_pl | float) }}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header">Portfolio Allocation by Value</div>
+                <div class="card-body">
+                    <canvas id="allocationChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% else %}
+    <div class="alert alert-info" role="alert">
+      <h4 class="alert-heading">Welcome!</h4>
+      <p>No positions were found in your account. If you have holdings, data may still be loading. Otherwise, once you fund your account and make trades, your positions will appear here.</p>
+      <hr>
+      <p class="mb-0">If you have not done so, please <a href="{{ url_for('main.profile') }}">go to your profile</a> to ensure your API Key and Account Number are correct.</p>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+    {% if positions %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script type="text/javascript">
+    const chartLabels = [{% for p in positions %}'{{ p.symbol }}',{% endfor %}];
+    const chartData = [{% for p in positions %}{{ p.market_value | float }},{% endfor %}];
+    const ctx = document.getElementById('allocationChart').getContext('2d');
+    const allocationChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: chartLabels,
+            datasets: [{
+                label: 'Market Value',
+                data: chartData,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.5)','rgba(54, 162, 235, 0.5)','rgba(255, 206, 86, 0.5)',
+                    'rgba(75, 192, 192, 0.5)','rgba(153, 102, 255, 0.5)','rgba(255, 159, 64, 0.5)',
+                    'rgba(199, 199, 199, 0.5)','rgba(83, 102, 255, 0.5)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: true }
+    });
+</script>
+{% endif %}
+{% endblock %}

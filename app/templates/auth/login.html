@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row d-flex justify-content-center mt-5">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body p-4">
+                <h3 class="card-title text-center mb-4">Log In</h3>
+                
+                <form method="POST" action="">
+                    {{ form.hidden_tag() }}
+
+                    <div class="form-outline mb-4" data-mdb-input-init>
+                        {{ form.email(class="form-control") }}
+                        {{ form.email.label(class="form-label") }}
+                    </div>
+                    {% if form.email.errors %}
+                        {% for error in form.email.errors %}
+                            <div class="text-danger small mb-2">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <div class="form-outline mb-4" data-mdb-input-init>
+                        {{ form.password(class="form-control") }}
+                        {{ form.password.label(class="form-label") }}
+                    </div>
+                     {% if form.password.errors %}
+                        {% for error in form.password.errors %}
+                            <div class="text-danger small mb-2">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+
+                <div class="text-center mt-3 border-top pt-3">
+                    <small class="text-muted">
+                        Need An Account? <a href="{{ url_for('auth.register') }}">Sign Up Here</a>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
