@@ -9,14 +9,12 @@ trade = Blueprint('trade', __name__)
 @trade.route('/trade', methods=['GET', 'POST'])
 @login_required
 def trading_page():
-    # --- ADDED PREFIXES TO EACH FORM ---
     stock_form = StockOrderForm(prefix='stock')
     option_form = OptionOrderForm(prefix='option')
     vertical_form = VerticalSpreadForm(prefix='vertical')
     condor_form = IronCondorForm(prefix='condor')
 
     if 'submit_stock' in request.form and stock_form.validate_on_submit():
-        # ... (stock submission logic remains unchanged)
         api = get_api_for_current_user()
         if not api:
             flash('Cannot place order. Please check your API credentials in your profile.', 'danger')
@@ -34,24 +32,28 @@ def trading_page():
         return redirect(url_for('trade.trading_page'))
 
     elif 'submit_option' in request.form and option_form.validate_on_submit():
-        # ... (option submission logic remains unchanged)
         api = get_api_for_current_user()
         if not api:
             flash('Cannot place order. Please check your API credentials in your profile.', 'danger')
             return redirect(url_for('trade.trading_page'))
+        option_symbol = generate_occ_symbol(
+            underlying=option_form.underlying_symbol.data,
+            expiration_str=option_form.expiration_date.data,
+            option_type=option_form.option_type.data,
+            strike=option_form.strike.data
+        )
         order_payload = {
-            'class': 'option', 'symbol': option_form.underlying_symbol.data.upper(), 'option_symbol': option_form.option_symbol.data.upper(),
+            'class': 'option', 'symbol': option_form.underlying_symbol.data.upper(), 'option_symbol': option_symbol,
             'side': option_form.side.data, 'quantity': str(option_form.quantity.data), 'type': option_form.order_type.data, 'duration': option_form.duration.data
         }
         if option_form.limit_price.data is not None: order_payload['price'] = f"{option_form.limit_price.data:.2f}"
         response = api.place_order(order_payload)
-        if response and response.get('order'): flash(f"Option order submitted! Status: {response['order'].get('status', 'N/A')}", 'success')
+        if response and response.get('order'): flash(f"Option order for {order_payload['quantity']} contract(s) of {option_symbol} submitted! Status: {response['order'].get('status', 'N/A')}", 'success')
         elif response and response.get('errors'): flash(f"Order failed: {', '.join(response['errors']['error'])}", 'danger')
         else: flash('An unknown error occurred while placing the option order.', 'danger')
         return redirect(url_for('trade.trading_page'))
 
     elif 'submit_vertical' in request.form and vertical_form.validate_on_submit():
-        # ... (vertical spread submission logic remains unchanged)
         api = get_api_for_current_user()
         if not api:
             flash('Cannot place order. Please check your API credentials in your profile.', 'danger')
@@ -71,7 +73,6 @@ def trading_page():
         return redirect(url_for('trade.trading_page'))
 
     elif 'submit_condor' in request.form and condor_form.validate_on_submit():
-        # ... (iron condor submission logic remains unchanged)
         api = get_api_for_current_user()
         if not api:
             flash('Cannot place order. Please check your API credentials in your profile.', 'danger')
@@ -115,3 +116,19 @@ def get_expirations(symbol):
         return jsonify(dates=dates)
     else:
         return jsonify({'error': 'Could not fetch expiration dates for this symbol.'}), 404
+
+@trade.route('/get_strikes/<string:symbol>/<string:expiration>')
+@login_required
+def get_strikes(symbol, expiration):
+    api = get_api_for_current_user()
+    if not api:
+        return jsonify({'error': 'API client not available.'}), 400
+    data = api.get_option_chain(symbol.upper(), expiration)
+    if data and data.get('options') and data['options'].get('option'):
+        options_list = data['options']['option']
+        if not isinstance(options_list, list):
+            options_list = [options_list]
+        strikes = sorted(list(set(opt['strike'] for opt in options_list)))
+        return jsonify(strikes=strikes)
+    else:
+        return jsonify({'error': 'Could not fetch strike prices.'}), 404

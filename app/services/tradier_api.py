@@ -15,12 +15,9 @@ class TradierAPI:
         }
 
     def _get(self, endpoint, params=None):
-        """
-        Private helper method to perform a GET request.
-        """
+        # ... (This helper method is unchanged) ...
         if not self._api_key:
             return None
-        
         try:
             url = f"{self._base_url}{endpoint}"
             response = requests.get(url, headers=self._headers, params=params)
@@ -31,12 +28,9 @@ class TradierAPI:
             return None
 
     def _post(self, endpoint, payload):
-        """
-        Private helper method to perform a POST request.
-        """
+        # ... (This helper method is unchanged) ...
         if not self._api_key:
             return None
-        
         try:
             url = f"{self._base_url}{endpoint}"
             response = requests.post(url, headers=self._headers, data=payload)
@@ -50,43 +44,43 @@ class TradierAPI:
                 return {'error': str(e)}
 
     def get_account_balances(self):
-        """Fetches account balance information."""
+        # ... (This method is unchanged) ...
         endpoint = f'/accounts/{self._account_number}/balances'
         return self._get(endpoint)
 
     def get_positions(self):
-        """Fetches all positions in the account."""
+        # ... (This method is unchanged) ...
         endpoint = f'/accounts/{self._account_number}/positions'
         return self._get(endpoint)
 
     def get_quotes(self, symbols):
-        """Fetches quote data for a list of symbols."""
+        # ... (This method is unchanged) ...
         if not symbols:
             return None
         params = {'symbols': ','.join(symbols)}
         return self._get('/markets/quotes', params=params)
     
-    def get_option_expirations(self, symbol): # <-- ADDED NEW METHOD
-        """
-        Fetches all available option expiration dates for a given symbol.
-        Corresponds to: /v1/markets/options/expirations
-        """
+    def get_option_expirations(self, symbol):
+        # ... (This method is unchanged) ...
         params = {'symbol': symbol}
         return self._get('/markets/options/expirations', params=params)
+    
+    def get_option_chain(self, symbol, expiration): # <-- ADDED NEW METHOD
+        """
+        Fetches the option chain for a given symbol and expiration date.
+        Corresponds to: /v1/markets/options/chains
+        """
+        params = {'symbol': symbol, 'expiration': expiration}
+        return self._get('/markets/options/chains', params=params)
         
     def place_order(self, order_payload):
-        """
-        Places a trade order for stocks, single options, or multi-leg options.
-        """
+        # ... (This method is unchanged) ...
         endpoint = f'/accounts/{self._account_number}/orders'
         return self._post(endpoint, payload=order_payload)
 
 # --- Helper Function ---
 def get_api_for_current_user():
-    """
-    A factory function that creates a TradierAPI instance
-    for the currently logged-in user.
-    """
+    # ... (This function is unchanged) ...
     if current_user.is_authenticated and current_user.tradier_api_key:
         return TradierAPI(
             api_key=current_user.tradier_api_key,
