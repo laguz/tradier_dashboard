@@ -17,10 +17,10 @@
                 <h4>Stock Order</h4>
                 <form method="POST" action="{{ url_for('trade.trading_page') }}">
                     {{ stock_form.hidden_tag() }}
-                    <div class="row"><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ stock_form.symbol(class="form-control") }}{{ stock_form.symbol.label(class="form-label") }}</div></div><div class="col-md-6 mb-4">{{ stock_form.side(class="form-control") }}</div></div>
-                    <div class="row"><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ stock_form.quantity(class="form-control") }}{{ stock_form.quantity.label(class="form-label") }}</div></div><div class="col-md-6 mb-4">{{ stock_form.duration(class="form-control") }}</div></div>
-                    <div class="row"><div class="col-md-12 mb-4">{{ stock_form.order_type(class="form-control", id="stock-order_type") }}</div></div>
-                    <div class="row" id="stock_price_fields"><div class="col-md-6 mb-4" id="stock_limit_price_div"><div data-mdb-input-init class="form-outline">{{ stock_form.limit_price(class="form-control") }}{{ stock_form.limit_price.label(class="form-label") }}</div></div><div class="col-md-6 mb-4" id="stock_stop_price_div"><div data-mdb-input-init class="form-outline">{{ stock_form.stop_price(class="form-control") }}{{ stock_form.stop_price.label(class="form-label") }}</div></div></div>
+                    <div class="row"><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ stock_form.symbol(class="form-control") }}{{ stock_form.symbol.label(class="form-label") }}</div>{% for error in stock_form.symbol.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div><div class="col-md-6 mb-4">{{ stock_form.side(class="form-select") }}{% for error in stock_form.side.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div></div>
+                    <div class="row"><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ stock_form.quantity(class="form-control") }}{{ stock_form.quantity.label(class="form-label") }}</div>{% for error in stock_form.quantity.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div><div class="col-md-6 mb-4">{{ stock_form.duration(class="form-select") }}{% for error in stock_form.duration.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div></div>
+                    <div class="row"><div class="col-md-12 mb-4">{{ stock_form.order_type(class="form-select", id="stock-order_type") }}{% for error in stock_form.order_type.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div></div>
+                    <div class="row" id="stock_price_fields"><div class="col-md-6 mb-4" id="stock_limit_price_div"><div data-mdb-input-init class="form-outline">{{ stock_form.limit_price(class="form-control") }}{{ stock_form.limit_price.label(class="form-label") }}</div>{% for error in stock_form.limit_price.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div><div class="col-md-6 mb-4" id="stock_stop_price_div"><div data-mdb-input-init class="form-outline">{{ stock_form.stop_price(class="form-control") }}{{ stock_form.stop_price.label(class="form-label") }}</div>{% for error in stock_form.stop_price.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div></div>
                     <button type="submit" name="submit_stock" class="btn btn-primary">Submit Order</button>
                 </form>
             </div>
@@ -30,16 +30,19 @@
                 <form method="POST" action="{{ url_for('trade.trading_page') }}">
                     {{ option_form.hidden_tag() }}
                     <label class="form-label" for="option-underlying_symbol">Underlying Symbol</label>
-                    <div class="input-group mb-4">
-                        {{ option_form.underlying_symbol(class="form-control") }}
+                    <div class="input-group">
+                        <div data-mdb-input-init class="form-outline flex-fill">
+                            {{ option_form.underlying_symbol(class="form-control") }}
+                        </div>
                         <button class="btn btn-outline-primary" type="button" id="option-fetch-expirations-btn" data-mdb-ripple-init>Fetch Dates</button>
                     </div>
-                    <div class="row"><div class="col-md-6 mb-4">{{ option_form.expiration_date(class="form-control") }}</div><div class="col-md-6 mb-4">{{ option_form.option_type(class="form-control") }}</div></div>
-                    <div class="row"><div class="col-md-6 mb-4">{{ option_form.strike(class="form-control") }}</div></div>
+                    {% for error in option_form.underlying_symbol.errors %}<div class="text-danger small ms-1 mb-4">{{ error }}</div>{% endfor %}
+                    <div class="row mt-4"><div class="col-md-6 mb-4">{{ option_form.expiration_date(class="form-select") }}{% for error in option_form.expiration_date.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div><div class="col-md-6 mb-4">{{ option_form.option_type(class="form-select") }}{% for error in option_form.option_type.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div></div>
+                    <div class="row"><div class="col-md-6 mb-4">{{ option_form.strike(class="form-select") }}{% for error in option_form.strike.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div></div>
                     <hr class="my-4">
-                    <div class="row"><div class="col-md-6 mb-4">{{ option_form.side(class="form-control") }}</div><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ option_form.quantity(class="form-control") }}{{ option_form.quantity.label(class="form-label") }}</div></div></div>
-                    <div class="row"><div class="col-md-6 mb-4">{{ option_form.order_type(class="form-control") }}</div><div class="col-md-6 mb-4">{{ option_form.duration(class="form-control") }}</div></div>
-                    <div class="row"><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ option_form.limit_price(class="form-control") }}{{ option_form.limit_price.label(class="form-label") }}</div></div></div>
+                    <div class="row"><div class="col-md-6 mb-4">{{ option_form.side(class="form-select") }}{% for error in option_form.side.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ option_form.quantity(class="form-control") }}{{ option_form.quantity.label(class="form-label") }}</div>{% for error in option_form.quantity.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div></div>
+                    <div class="row"><div class="col-md-6 mb-4">{{ option_form.order_type(class="form-select") }}{% for error in option_form.order_type.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div><div class="col-md-6 mb-4">{{ option_form.duration(class="form-select") }}{% for error in option_form.duration.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div></div>
+                    <div class="row"><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ option_form.limit_price(class="form-control") }}{{ option_form.limit_price.label(class="form-label") }}</div>{% for error in option_form.limit_price.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div></div>
                     <button type="submit" name="submit_option" class="btn btn-primary">Preview Option Order</button>
                 </form>
             </div>
@@ -49,14 +52,17 @@
                 <form method="POST" action="{{ url_for('trade.trading_page') }}">
                     {{ vertical_form.hidden_tag() }}
                     <label class="form-label" for="vertical-underlying_symbol">Underlying Symbol</label>
-                    <div class="input-group mb-4">
-                        {{ vertical_form.underlying_symbol(class="form-control") }}
+                    <div class="input-group">
+                        <div data-mdb-input-init class="form-outline flex-fill">
+                            {{ vertical_form.underlying_symbol(class="form-control") }}
+                        </div>
                         <button class="btn btn-outline-primary" type="button" id="vertical-fetch-expirations-btn" data-mdb-ripple-init>Fetch Dates</button>
                     </div>
-                    <div class="row"><div class="col-md-6 mb-4">{{ vertical_form.expiration_date(class="form-control") }}</div><div class="col-md-6 mb-4">{{ vertical_form.spread_type(class="form-control") }}</div></div>
-                    <div class="row"><div class="col-md-6 mb-4">{{ vertical_form.credit_debit(class="form-control") }}</div></div>
-                    <div class="row"><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ vertical_form.strike_short(class="form-control") }}{{ vertical_form.strike_short.label(class="form-label") }}</div></div><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ vertical_form.strike_long(class="form-control") }}{{ vertical_form.strike_long.label(class="form-label") }}</div></div></div>
-                    <div class="row"><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ vertical_form.quantity(class="form-control") }}{{ vertical_form.quantity.label(class="form-label") }}</div></div><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ vertical_form.limit_price(class="form-control") }}{{ vertical_form.limit_price.label(class="form-label") }}</div></div></div>
+                    {% for error in vertical_form.underlying_symbol.errors %}<div class="text-danger small ms-1 mb-4">{{ error }}</div>{% endfor %}
+                    <div class="row mt-4"><div class="col-md-6 mb-4">{{ vertical_form.expiration_date(class="form-select") }}{% for error in vertical_form.expiration_date.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div><div class="col-md-6 mb-4">{{ vertical_form.spread_type(class="form-select") }}{% for error in vertical_form.spread_type.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div></div>
+                    <div class="row"><div class="col-md-6 mb-4">{{ vertical_form.credit_debit(class="form-select") }}{% for error in vertical_form.credit_debit.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div></div>
+                    <div class="row"><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ vertical_form.strike_short(class="form-control") }}{{ vertical_form.strike_short.label(class="form-label") }}</div>{% for error in vertical_form.strike_short.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ vertical_form.strike_long(class="form-control") }}{{ vertical_form.strike_long.label(class="form-label") }}</div>{% for error in vertical_form.strike_long.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div></div>
+                    <div class="row"><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ vertical_form.quantity(class="form-control") }}{{ vertical_form.quantity.label(class="form-label") }}</div>{% for error in vertical_form.quantity.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ vertical_form.limit_price(class="form-control") }}{{ vertical_form.limit_price.label(class="form-label") }}</div>{% for error in vertical_form.limit_price.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div></div>
                     <button type="submit" name="submit_vertical" class="btn btn-primary">Preview Spread Order</button>
                 </form>
             </div>
@@ -66,14 +72,17 @@
                  <form method="POST" action="{{ url_for('trade.trading_page') }}">
                      {{ condor_form.hidden_tag() }}
                      <label class="form-label" for="condor-underlying_symbol">Underlying Symbol</label>
-                     <div class="input-group mb-4">
-                        {{ condor_form.underlying_symbol(class="form-control") }}
+                     <div class="input-group">
+                        <div data-mdb-input-init class="form-outline flex-fill">
+                            {{ condor_form.underlying_symbol(class="form-control") }}
+                        </div>
                         <button class="btn btn-outline-primary" type="button" id="condor-fetch-expirations-btn" data-mdb-ripple-init>Fetch Dates</button>
                      </div>
-                     <div class="row"><div class="col-md-6 mb-4">{{ condor_form.expiration_date(class="form-control") }}</div></div>
-                     <div class="row"><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ condor_form.long_put_strike(class="form-control") }}{{ condor_form.long_put_strike.label(class="form-label") }}</div></div><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ condor_form.short_put_strike(class="form-control") }}{{ condor_form.short_put_strike.label(class="form-label") }}</div></div></div>
-                     <div class="row"><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ condor_form.short_call_strike(class="form-control") }}{{ condor_form.short_call_strike.label(class="form-label") }}</div></div><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ condor_form.long_call_strike(class="form-control") }}{{ condor_form.long_call_strike.label(class="form-label") }}</div></div></div>
-                     <div class="row"><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ condor_form.quantity(class="form-control") }}{{ condor_form.quantity.label(class="form-label") }}</div></div><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ condor_form.limit_price(class="form-control") }}{{ condor_form.limit_price.label(class="form-label") }}</div></div></div>
+                     {% for error in condor_form.underlying_symbol.errors %}<div class="text-danger small ms-1 mb-4">{{ error }}</div>{% endfor %}
+                     <div class="row mt-4"><div class="col-md-6 mb-4">{{ condor_form.expiration_date(class="form-select") }}{% for error in condor_form.expiration_date.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div></div>
+                     <div class="row"><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ condor_form.long_put_strike(class="form-control") }}{{ condor_form.long_put_strike.label(class="form-label") }}</div>{% for error in condor_form.long_put_strike.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ condor_form.short_put_strike(class="form-control") }}{{ condor_form.short_put_strike.label(class="form-label") }}</div>{% for error in condor_form.short_put_strike.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div></div>
+                     <div class="row"><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ condor_form.short_call_strike(class="form-control") }}{{ condor_form.short_call_strike.label(class="form-label") }}</div>{% for error in condor_form.short_call_strike.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ condor_form.long_call_strike(class="form-control") }}{{ condor_form.long_call_strike.label(class="form-label") }}</div>{% for error in condor_form.long_call_strike.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div></div>
+                     <div class="row"><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ condor_form.quantity(class="form-control") }}{{ condor_form.quantity.label(class="form-label") }}</div>{% for error in condor_form.quantity.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ condor_form.limit_price(class="form-control") }}{{ condor_form.limit_price.label(class="form-label") }}</div>{% for error in condor_form.limit_price.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div></div>
                      <button type="submit" name="submit_condor" class="btn btn-primary">Preview Condor Order</button>
                  </form>
             </div>
@@ -88,7 +97,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // --- Script for stock order form ---
     const stockOrderTypeSelect = document.getElementById('stock-order_type');
     if (stockOrderTypeSelect) {
-        // ... (this logic is unchanged) ...
         const stockLimitPriceDiv = document.getElementById('stock_limit_price_div');
         const stockStopPriceDiv = document.getElementById('stock_stop_price_div');
         function toggleStockPriceFields() {
@@ -102,7 +110,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // --- Script for fetching option expirations ---
     function setupExpirationFetcher(formPrefix) {
-        // ... (this function is unchanged) ...
         const symbolInput = document.getElementById(`${formPrefix}-underlying_symbol`);
         const fetchBtn = document.getElementById(`${formPrefix}-fetch-expirations-btn`);
         const expirationSelect = document.getElementById(`${formPrefix}-expiration_date`);
@@ -129,7 +136,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // --- Script for fetching option strikes ---
     function setupStrikeFetcher(formPrefix) {
-        // ... (this function is unchanged) ...
         const symbolInput = document.getElementById(`${formPrefix}-underlying_symbol`);
         const expirationSelect = document.getElementById(`${formPrefix}-expiration_date`);
         const strikeSelect = document.getElementById(`${formPrefix}-strike`);
@@ -153,7 +159,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     setupStrikeFetcher('option');
 
-    // --- ADDED: SCRIPT TO REINITIALIZE MDB COMPONENTS ON TAB CHANGE ---
+    // --- Script to reinitialize MDB components on tab change ---
     const tradeTabLinks = document.querySelectorAll('#trade-tabs a[data-mdb-tab-init]');
     tradeTabLinks.forEach(tab => {
         tab.addEventListener('shown.mdb.tab', (event) => {

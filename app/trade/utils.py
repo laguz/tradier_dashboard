@@ -11,10 +11,10 @@ def generate_occ_symbol(underlying, expiration_str, option_type, strike):
         strike (Decimal or float): The strike price of the option.
         
     Returns:
-        str: The OCC option symbol, e.g., 'AAPL  251219C00175000'.
+        str: The OCC option symbol, e.g., 'AAPL251219C00175000'.
     """
-    # 1. Underlying symbol, padded to 6 characters with spaces on the right
-    symbol_padded = underlying.upper().ljust(6)
+    # 1. Underlying symbol, without padding
+    symbol_formatted = underlying.upper()
 
     # 2. Expiration date in YYMMDD format
     dt_obj = datetime.strptime(expiration_str, '%Y-%m-%d')
@@ -28,4 +28,4 @@ def generate_occ_symbol(underlying, expiration_str, option_type, strike):
     strike_in_thousandths = int(float(strike) * 1000)
     strike_formatted = f"{strike_in_thousandths:08d}"
 
-    return f"{symbol_padded}{date_formatted}{type_char}{strike_formatted}"
+    return f"{symbol_formatted}{date_formatted}{type_char}{strike_formatted}"
