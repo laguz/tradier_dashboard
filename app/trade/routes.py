@@ -14,7 +14,6 @@ def trading_page():
     vertical_form = VerticalSpreadForm(prefix='vertical')
     condor_form = IronCondorForm(prefix='condor')
 
-    # --- MODIFIED STOCK ORDER LOGIC ---
     if 'submit_stock' in request.form:
         if stock_form.validate_on_submit():
             api = get_api_for_current_user()
@@ -40,30 +39,105 @@ def trading_page():
             
             return redirect(url_for('trade.trading_page'))
         else:
-            # ADDED THIS BLOCK TO SHOW ERRORS
             flash(f"Stock form validation failed. Errors: {stock_form.errors}", 'danger')
-    # --- END MODIFIED LOGIC ---
 
     elif 'submit_option' in request.form:
-        # ... (option logic remains unchanged) ...
-        return redirect(url_for('trade.trading_page'))
+        submitted_expiration = request.form.get('option-expiration_date')
+        submitted_strike = request.form.get('option-strike')
+        if submitted_expiration: option_form.expiration_date.choices = [(submitted_expiration, submitted_expiration)]
+        if submitted_strike: option_form.strike.choices = [(submitted_strike, submitted_strike)]
+        
+        if option_form.validate_on_submit():
+            api = get_api_for_current_user()
+            if not api:
+                flash('Cannot place order. Please check your API credentials in your profile.', 'danger')
+                return redirect(url_for('trade.trading_page'))
+            option_symbol = generate_occ_symbol(
+                underlying=option_form.underlying_symbol.data,
+                expiration_str=option_form.expiration_date.data,
+                option_type=option_form.option_type.data,
+                strike=option_form.strike.data
+            )
+            order_payload = {
+                'class': 'option', 'symbol': option_form.underlying_symbol.data.upper(), 'option_symbol': option_symbol,
+                'side': option_form.side.data, 'quantity': str(option_form.quantity.data), 'type': option_form.order_type.data, 'duration': option_form.duration.data
+            }
+            if option_form.limit_price.data is not None:
+                order_payload['price'] = f"{option_form.limit_price.data:.2f}"
+            response = api.place_order(order_payload)
+            if response and response.get('order') and 'id' in response['order']:
+                flash(f"Option order for {option_form.quantity.data} contract(s) of {option_symbol} submitted! Status: {response['order'].get('status', 'N/A')}", 'success')
+            elif response and response.get('errors'):
+                flash(f"Order failed: {', '.join(response['errors']['error'])}", 'danger')
+            else:
+                flash(f'An unknown error occurred while placing the option order. Response: {response}', 'danger')
+            return redirect(url_for('trade.trading_page'))
+        else:
+            flash(f"Single Option form validation failed. Errors: {option_form.errors}", 'danger')
 
     elif 'submit_vertical' in request.form:
-        # ... (vertical spread logic remains unchanged) ...
-        return redirect(url_for('trade.trading_page'))
+        submitted_expiration = request.form.get('vertical-expiration_date')
+        if submitted_expiration: vertical_form.expiration_date.choices = [(submitted_expiration, submitted_expiration)]
+        
+        if vertical_form.validate_on_submit():
+            api = get_api_for_current_user()
+            if not api:
+                flash('Cannot place order. Please check your API credentials in your profile.', 'danger')
+                return redirect(url_for('trade.trading_page'))
+            short_leg_symbol = generate_occ_symbol(underlying=vertical_form.underlying_symbol.data, expiration_str=vertical_form.expiration_date.data, option_type=vertical_form.spread_type.data, strike=vertical_form.strike_short.data)
+            long_leg_symbol = generate_occ_symbol(underlying=vertical_form.underlying_symbol.data, expiration_str=vertical_form.expiration_date.data, option_type=vertical_form.spread_type.data, strike=vertical_form.strike_long.data)
+            order_payload = {
+                'class': 'multileg', 'symbol': vertical_form.underlying_symbol.data.upper(), 'type': vertical_form.credit_debit.data,
+                'duration': vertical_form.duration.data, 'price': f"{vertical_form.limit_price.data:.2f}",
+                'option_symbol[0]': short_leg_symbol, 'side[0]': 'sell_to_open', 'quantity[0]': str(vertical_form.quantity.data),
+                'option_symbol[1]': long_leg_symbol, 'side[1]': 'buy_to_open', 'quantity[1]': str(vertical_form.quantity.data)
+            }
+            response = api.place_order(order_payload)
+            if response and response.get('order'): flash(f"Vertical spread order submitted successfully! Status: {response['order'].get('status', 'N/A')}", 'success')
+            elif response and response.get('errors'): flash(f"Order failed: {', '.join(response['errors']['error'])}", 'danger')
+            else: flash('An unknown error occurred while placing the spread order.', 'danger')
+            return redirect(url_for('trade.trading_page'))
+        else:
+            flash(f"Vertical Spread form validation failed. Errors: {vertical_form.errors}", 'danger')
 
     elif 'submit_condor' in request.form:
-        # ... (iron condor logic remains unchanged) ...
-        return redirect(url_for('trade.trading_page'))
+        submitted_expiration = request.form.get('condor-expiration_date')
+        if submitted_expiration: condor_form.expiration_date.choices = [(submitted_expiration, submitted_expiration)]
+            
+        if condor_form.validate_on_submit():
+            api = get_api_for_current_user()
+            if not api:
+                flash('Cannot place order. Please check your API credentials in your profile.', 'danger')
+                return redirect(url_for('trade.trading_page'))
+            long_put = generate_occ_symbol(condor_form.underlying_symbol.data, condor_form.expiration_date.data, 'put', condor_form.long_put_strike.data)
+            short_put = generate_occ_symbol(condor_form.underlying_symbol.data, condor_form.expiration_date.data, 'put', condor_form.short_put_strike.data)
+            short_call = generate_occ_symbol(condor_form.underlying_symbol.data, condor_form.expiration_date.data, 'call', condor_form.short_call_strike.data)
+            long_call = generate_occ_symbol(condor_form.underlying_symbol.data, condor_form.expiration_date.data, 'call', condor_form.long_call_strike.data)
+            order_payload = {
+                'class': 'multileg', 'symbol': condor_form.underlying_symbol.data.upper(), 'type': 'credit', 'duration': condor_form.duration.data,
+                'price': f"{condor_form.limit_price.data:.2f}",
+                'option_symbol[0]': long_put, 'side[0]': 'buy_to_open', 'quantity[0]': str(condor_form.quantity.data),
+                'option_symbol[1]': short_put, 'side[1]': 'sell_to_open', 'quantity[1]': str(condor_form.quantity.data),
+                'option_symbol[2]': short_call, 'side[2]': 'sell_to_open', 'quantity[2]': str(condor_form.quantity.data),
+                'option_symbol[3]': long_call, 'side[3]': 'buy_to_open', 'quantity[3]': str(condor_form.quantity.data),
+            }
+            response = api.place_order(order_payload)
+            if response and response.get('order'): flash(f"Iron Condor order submitted successfully! Status: {response['order'].get('status', 'N/A')}", 'success')
+            elif response and response.get('errors'): flash(f"Order failed: {', '.join(response['errors']['error'])}", 'danger')
+            else: flash('An unknown error occurred while placing the condor order.', 'danger')
+            return redirect(url_for('trade.trading_page'))
+        else:
+            flash(f"Iron Condor form validation failed. Errors: {condor_form.errors}", 'danger')
 
     return render_template('trade/trade.html', 
                            title='Trade', stock_form=stock_form, option_form=option_form,
                            vertical_form=vertical_form, condor_form=condor_form)
 
-# ... (get_expirations and get_strikes routes are unchanged) ...
+
 @trade.route('/get_expirations/<string:symbol>')
 @login_required
 def get_expirations(symbol):
+    # ... (This route is unchanged) ...
     api = get_api_for_current_user()
     if not api: return jsonify({'error': 'API client not available. Check profile.'}), 400
     data = api.get_option_expirations(symbol.upper())
@@ -77,6 +151,7 @@ def get_expirations(symbol):
 @trade.route('/get_strikes/<string:symbol>/<string:expiration>')
 @login_required
 def get_strikes(symbol, expiration):
+    # ... (This route is unchanged) ...
     api = get_api_for_current_user()
     if not api: return jsonify({'error': 'API client not available.'}), 400
     data = api.get_option_chain(symbol.upper(), expiration)
