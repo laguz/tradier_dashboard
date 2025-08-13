@@ -52,13 +52,21 @@ class IronCondorForm(FlaskForm):
     duration = SelectField('Duration', choices=[('day', 'Day Order'), ('gtc', 'Good \'til Canceled')], validators=[DataRequired()])
     
     def validate(self, extra_validators=None):
+        # Run the standard field-level validators first
         if not super().validate(extra_validators):
             return False
         
-        if not (self.long_put_strike.data < self.short_put_strike.data and \
-                self.short_put_strike.data < self.short_call_strike.data and \
-                self.short_call_strike.data < self.long_call_strike.data):
-            msg = "Strikes must be in ascending order: Long Put < Short Put < Short Call < Long Call."
-            self.long_put_strike.errors.append(msg)
-            return False
+        # Store data in variables for clarity and to ensure they are not None
+        lp = self.long_put_strike.data
+        sp = self.short_put_strike.data
+        sc = self.short_call_strike.data
+        lc = self.long_call_strike.data
+
+        # Check that all strike data is present before attempting to compare
+        if all((lp, sp, sc, lc)):
+            if not (lp < sp < sc < lc):
+                # Create a more detailed error message
+                msg = f"Strike order is invalid. Your values were: {lp} < {sp} < {sc} < {lc}. Please ensure they are in ascending order."
+                self.long_put_strike.errors.append(msg)
+                return False
         return True
