@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      # Use the optimized Dockerfile from the previous step
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    volumes:
+      # Mounts the application code into the container for live-reloading
+      - .:/home/app
+    env_file:
+      # Loads environment variables from a .env file
+      - .env
+    networks:
+      - app-network
+    depends_on:
+      # Ensures mongodb is started before the web service
+      - mongodb
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      # Optional: only expose if you need to connect from the host machine
+      - "27017:27017"
+    volumes:
+      # Use a named volume to persist database data
+      - mongo-data:/data/db
+    networks:
+      - app-network
+
+# Define the network for the services to communicate
+networks:
+  app-network:
+    driver: bridge
+
+# Define the named volume for data persistence
+volumes:
+  mongo-data:
