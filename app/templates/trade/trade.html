@@ -21,7 +21,7 @@
                     <div class="row"><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ stock_form.quantity(class="form-control") }}{{ stock_form.quantity.label(class="form-label") }}</div>{% for error in stock_form.quantity.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div><div class="col-md-6 mb-4">{{ stock_form.duration(class="form-select") }}{% for error in stock_form.duration.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div></div>
                     <div class="row"><div class="col-md-12 mb-4">{{ stock_form.order_type(class="form-select", id="stock-order_type") }}{% for error in stock_form.order_type.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div></div>
                     <div class="row" id="stock_price_fields"><div class="col-md-6 mb-4" id="stock_limit_price_div"><div data-mdb-input-init class="form-outline">{{ stock_form.limit_price(class="form-control") }}{{ stock_form.limit_price.label(class="form-label") }}</div>{% for error in stock_form.limit_price.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div><div class="col-md-6 mb-4" id="stock_stop_price_div"><div data-mdb-input-init class="form-outline">{{ stock_form.stop_price(class="form-control") }}{{ stock_form.stop_price.label(class="form-label") }}</div>{% for error in stock_form.stop_price.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div></div>
-                    <button type="submit" name="submit_stock" class="btn btn-primary">Submit Order</button>
+                    <button type="submit" name="submit_stock" class="btn btn-primary">Submit Stock Order</button>
                 </form>
             </div>
 
@@ -43,7 +43,7 @@
                     <div class="row"><div class="col-md-6 mb-4">{{ option_form.side(class="form-select") }}{% for error in option_form.side.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ option_form.quantity(class="form-control") }}{{ option_form.quantity.label(class="form-label") }}</div>{% for error in option_form.quantity.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div></div>
                     <div class="row"><div class="col-md-6 mb-4">{{ option_form.order_type(class="form-select") }}{% for error in option_form.order_type.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div><div class="col-md-6 mb-4">{{ option_form.duration(class="form-select") }}{% for error in option_form.duration.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div></div>
                     <div class="row"><div class="col-md-6 mb-4"><div data-mdb-input-init class="form-outline">{{ option_form.limit_price(class="form-control") }}{{ option_form.limit_price.label(class="form-label") }}</div>{% for error in option_form.limit_price.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div></div>
-                    <button type="submit" name="submit_option" class="btn btn-primary">Preview Option Order</button>
+                    <button type="submit" name="submit_option" class="btn btn-primary">Submit Option Order</button>
                 </form>
             </div>
 
@@ -66,7 +66,7 @@
                     <div class="row">
                         <div class="col-md-6 mb-4">{{ vertical_form.duration(class="form-select") }}{% for error in vertical_form.duration.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}</div>
                     </div>
-                    <button type="submit" name="submit_vertical" class="btn btn-primary">Preview Spread Order</button>
+                    <button type="submit" name="submit_vertical" class="btn btn-primary">Submit Spread Order</button>
                 </form>
             </div>
 
@@ -92,7 +92,7 @@
                             {% for error in condor_form.duration.errors %}<div class="text-danger small ms-1">{{ error }}</div>{% endfor %}
                         </div>
                      </div>
-                     <button type="submit" name="submit_condor" class="btn btn-primary">Preview Condor Order</button>
+                     <button type="submit" name="submit_condor" class="btn btn-primary">Submit Iron Condor Order</button>
                  </form>
             </div>
         </div>
