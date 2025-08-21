@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-body">
+        <h4 class="card-title">Stock Research</h4>
+        <p class="card-text">Enter a stock symbol to generate a support and resistance analysis for the last 185 days.</p>
+        <form method="POST" action="{{ url_for('research.research_page') }}">
+            {{ form.hidden_tag() }}
+            <div class="input-group">
+                <div data-mdb-input-init class="form-outline flex-fill">
+                    {{ form.symbol(class="form-control", placeholder="e.g., AAPL, TSLA") }}
+                    {{ form.symbol.label(class="form-label") }}
+                </div>
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+            {% for error in form.symbol.errors %}
+                <div class="text-danger small ms-1 mt-2">{{ error }}</div>
+            {% endfor %}
+        </form>
+    </div>
+</div>
+
+{% if plot_url %}
+<div class="card">
+    <div class="card-header text-center">
+        Analysis Results for <strong>{{ form.symbol.data.upper() }}</strong>
+    </div>
+    <div class="card-body">
+        <div class="text-center mb-4">
+            <img src="data:image/png;base64, {{ plot_url }}" class="img-fluid shadow-1-strong" alt="Support and Resistance Chart">
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <h5 class="text-success">Support Levels</h5>
+                {% if levels.support %}
+                    <ul class="list-group list-group-light">
+                        {% for level in levels.support %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div><i class="fas fa-arrow-down me-2"></i>${{ level }}</div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">No significant support levels found in this period.</p>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                <h5 class="text-danger">Resistance Levels</h5>
+                {% if levels.resistance %}
+                    <ul class="list-group list-group-light">
+                        {% for level in levels.resistance %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div><i class="fas fa-arrow-up me-2"></i>${{ level }}</div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">No significant resistance levels found in this period.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

@@ -48,9 +48,10 @@ def create_app():
         from .auth.routes import auth as auth_blueprint
         app.register_blueprint(auth_blueprint, url_prefix='/auth')
 
-        # --- ADD THESE LINES ---
         from .trade.routes import trade as trade_blueprint
         app.register_blueprint(trade_blueprint)
-        # --- END ADDED LINES ---
+
+        from .research.routes import research as research_blueprint
+        app.register_blueprint(research_blueprint)
 
     return app

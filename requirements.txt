@@ -7,3 +7,7 @@ email-validator
 python-dotenv
 requests
 gunicorn
+yfinance
+pandas
+numpy
+matplotlib
