@@ -29,9 +29,14 @@ def dashboard():
     
     if balances_data and balances_data.get('balances'):
         b = balances_data['balances']
+        pnl_data = b.get('pnl')
+        todays_pnl = pnl_data.get('todays_pnl') if pnl_data else None
+        
         kpis = {
-            'total_equity': b.get('total_equity'), 'total_cash': b.get('total_cash'),
-            'unrealized_pl': b.get('unrealized_pl'), 'day_pl': b.get('pnl', {}).get('todays_pnl')
+            'total_equity': b.get('total_equity'),
+            'total_cash': b.get('total_cash'),
+            'unrealized_pl': b.get('unrealized_pl'),
+            'day_pl': todays_pnl
         }
     
     if positions_data and positions_data.get('positions') and positions_data['positions'] != 'null':
