@@ -10,7 +10,6 @@ RUN pip install --upgrade pip
 RUN pip install wheel
 
 # Copy requirements and install dependencies as wheels
-# This leverages Docker's layer caching effectively
 COPY ./requirements.txt .
 RUN pip wheel --no-cache-dir --wheel-dir /usr/src/app/wheels -r requirements.txt
 
@@ -18,6 +17,15 @@ RUN pip wheel --no-cache-dir --wheel-dir /usr/src/app/wheels -r requirements.txt
 # --- Final Stage ---
 # Use a slim image for a smaller footprint
 FROM python:3.8-slim
+
+# --- ADDED BLOCK ---
+# Install system dependencies required by matplotlib
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libfreetype6-dev \
+    libpng-dev \
+    && rm -rf /var/lib/apt/lists/*
+# --- END ADDED BLOCK ---
 
 # Create a non-root user to run the application
 RUN addgroup --system app && adduser --system --group app
@@ -29,12 +37,10 @@ WORKDIR /home/app
 COPY --from=builder /usr/src/app/wheels /wheels
 
 # Install the wheels using the copied packages
-# This avoids needing build tools in the final image
 COPY ./requirements.txt .
 RUN pip install --no-cache /wheels/*
 
 # Copy the application source code
-# Ensure the correct permissions for the non-root user
 COPY --chown=app:app . .
 
 # Switch to the non-root user
