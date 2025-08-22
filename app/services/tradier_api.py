@@ -1,5 +1,6 @@
 import requests
 from flask_login import current_user
+from datetime import date, timedelta 
 
 class TradierAPI:
     """
@@ -42,6 +43,22 @@ class TradierAPI:
                 return response.json()
             except ValueError:
                 return {'error': str(e)}
+            
+    def get_historical_prices(self, symbol, period_days=185):
+        """
+        Fetches historical price data for a given symbol.
+        Corresponds to: /v1/markets/history
+        """
+        end_date = date.today()
+        start_date = end_date - timedelta(days=period_days)
+        
+        params = {
+            'symbol': symbol,
+            'interval': 'daily',
+            'start': start_date.strftime('%Y-%m-%d'),
+            'end': end_date.strftime('%Y-%m-%d')
+        }
+        return self._get('/markets/history', params=params)
 
     def get_account_balances(self):
         # ... (This method is unchanged) ...
