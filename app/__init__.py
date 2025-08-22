@@ -54,4 +54,7 @@ def create_app():
         from .research.routes import research as research_blueprint
         app.register_blueprint(research_blueprint)
 
+        from .autotrade.routes import autotrade as autotrade_blueprint
+        app.register_blueprint(autotrade_blueprint)
+
     return app

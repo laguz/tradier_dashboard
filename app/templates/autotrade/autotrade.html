@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-body">
+        <h4 class="card-title">Automated TSLA Credit Spread Finder</h4>
+        <p class="card-text">
+            This tool analyzes the last 185 days of TSLA data to find support and resistance levels.
+            It then proposes a Put Credit Spread based on the nearest support and a Call Credit Spread
+            based on the nearest resistance for the 5th available option expiration date.
+        </p>
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}
+            {{ form.submit(class="btn btn-primary") }}
+        </form>
+    </div>
+</div>
+
+{% if trades %}
+<div class="card">
+    <div class="card-header text-center">
+        Proposed Trades for TSLA (Current Price: ${{ "%.2f"|format(trades.current_price) }})
+    </div>
+    <div class="card-body">
+        <p class="text-center"><strong>Target Expiration Date:</strong> {{ trades.expiration or 'Not Found' }}</p>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Proposed Put Credit Spread</h5>
+                        {% if trades.put_spread %}
+                            <ul class="list-group list-group-light list-group-flush">
+                                <li class="list-group-item"><strong>Action:</strong> Sell Put Spread (Bullish)</li>
+                                <li class="list-group-item"><strong>Sell Strike (Short Leg):</strong> {{ trades.put_spread.sell_strike }}</li>
+                                <li class="list-group-item"><strong>Buy Strike (Long Leg):</strong> {{ trades.put_spread.buy_strike }}</li>
+                            </ul>
+                        {% else %}
+                            <p class="text-muted mt-4">Could not determine a valid Put Credit Spread based on the rules.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Proposed Call Credit Spread</h5>
+                        {% if trades.call_spread %}
+                             <ul class="list-group list-group-light list-group-flush">
+                                <li class="list-group-item"><strong>Action:</strong> Sell Call Spread (Bearish)</li>
+                                <li class="list-group-item"><strong>Sell Strike (Short Leg):</strong> {{ trades.call_spread.sell_strike }}</li>
+                                <li class="list-group-item"><strong>Buy Strike (Long Leg):</strong> {{ trades.call_spread.buy_strike }}</li>
+                            </ul>
+                        {% else %}
+                            <p class="text-muted mt-4">Could not determine a valid Call Credit Spread based on the rules.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-4">
+            <p class="small text-muted">(Execution of trades will be added in a future step)</p>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
