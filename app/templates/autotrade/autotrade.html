@@ -22,6 +22,8 @@
     </div>
     <div class="card-body">
         <p class="text-center"><strong>Target Expiration Date:</strong> {{ trades.expiration or 'Not Found' }}</p>
+        
+        {% if trades.expiration %}
         <div class="row">
             <div class="col-md-6">
                 <div class="card h-100">
@@ -35,12 +37,12 @@
                             </ul>
                             <form method="POST" class="mt-3">
                                 {{ put_exec_form.hidden_tag() }}
-                                {{ put_exec_form.underlying_symbol(value='TSLA') }}
-                                {{ put_exec_form.expiration_date(value=trades.expiration) }}
-                                {{ put_exec_form.spread_type(value='put') }}
-                                {{ put_exec_form.credit_debit(value='credit') }}
-                                {{ put_exec_form.strike_short(value=trades.put_spread.sell_strike) }}
-                                {{ put_exec_form.strike_long(value=trades.put_spread.buy_strike) }}
+                                {{ put_exec_form.underlying_symbol }}
+                                {{ put_exec_form.expiration_date }}
+                                {{ put_exec_form.spread_type }}
+                                {{ put_exec_form.credit_debit }}
+                                {{ put_exec_form.strike_short }}
+                                {{ put_exec_form.strike_long }}
                                 <div class="row mt-3">
                                     <div class="col"><div data-mdb-input-init class="form-outline">{{ put_exec_form.quantity(class="form-control") }}{{ put_exec_form.quantity.label() }}</div></div>
                                     <div class="col"><div data-mdb-input-init class="form-outline">{{ put_exec_form.limit_price(class="form-control") }}{{ put_exec_form.limit_price.label() }}</div></div>
@@ -66,12 +68,12 @@
                             </ul>
                              <form method="POST" class="mt-3">
                                 {{ call_exec_form.hidden_tag() }}
-                                {{ call_exec_form.underlying_symbol(value='TSLA') }}
-                                {{ call_exec_form.expiration_date(value=trades.expiration) }}
-                                {{ call_exec_form.spread_type(value='call') }}
-                                {{ call_exec_form.credit_debit(value='credit') }}
-                                {{ call_exec_form.strike_short(value=trades.call_spread.sell_strike) }}
-                                {{ call_exec_form.strike_long(value=trades.call_spread.buy_strike) }}
+                                {{ call_exec_form.underlying_symbol }}
+                                {{ call_exec_form.expiration_date }}
+                                {{ call_exec_form.spread_type }}
+                                {{ call_exec_form.credit_debit }}
+                                {{ call_exec_form.strike_short }}
+                                {{ call_exec_form.strike_long }}
                                 <div class="row mt-3">
                                     <div class="col"><div data-mdb-input-init class="form-outline">{{ call_exec_form.quantity(class="form-control") }}{{ call_exec_form.quantity.label() }}</div></div>
                                     <div class="col"><div data-mdb-input-init class="form-outline">{{ call_exec_form.limit_price(class="form-control") }}{{ call_exec_form.limit_price.label() }}</div></div>
@@ -85,6 +87,7 @@
                 </div>
             </div>
         </div>
+        {% endif %}
     </div>
 </div>
 {% endif %}
