@@ -3,14 +3,24 @@
 {% block content %}
 <div class="card mb-4">
     <div class="card-body">
-        <h4 class="card-title">Automated TSLA Credit Spread Finder</h4>
+        <h4 class="card-title">Automated Credit Spread Finder</h4>
         <p class="card-text">
-            This tool analyzes the last 185 days of TSLA data to find support and resistance levels.
-            It then proposes a Put Credit Spread and a Call Credit Spread based on your rules for the 5th available option expiration date.
+            This tool analyzes a stock's historical data to find support and resistance levels.
+            It then proposes a Put Credit Spread and a Call Credit Spread for you to review and approve.
         </p>
         <form method="POST" action="">
             {{ form.hidden_tag() }}
-            {{ form.submit(class="btn btn-primary") }}
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <div data-mdb-input-init class="form-outline">
+                        {{ form.symbol(class="form-control") }}
+                        {{ form.symbol.label(class="form-label") }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    {{ form.submit(class="btn btn-primary w-100") }}
+                </div>
+            </div>
         </form>
     </div>
 </div>
@@ -18,14 +28,14 @@
 {% if trades %}
 <div class="card">
     <div class="card-header text-center">
-        Proposed Trades for TSLA (Current Price: ${{ "%.2f"|format(trades.current_price) }})
+        Proposed Trades for <strong>{{ trades.symbol }}</strong> (Current Price: ${{ "%.2f"|format(trades.current_price) }})
     </div>
     <div class="card-body">
         <p class="text-center"><strong>Target Expiration Date:</strong> {{ trades.expiration or 'Not Found' }}</p>
         
         {% if trades.expiration %}
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-lg-6 mb-4 mb-lg-0">
                 <div class="card h-100">
                     <div class="card-body text-center">
                         <h5 class="card-title">Proposed Put Credit Spread</h5>
@@ -47,7 +57,7 @@
                                     <div class="col"><div data-mdb-input-init class="form-outline">{{ put_exec_form.quantity(class="form-control") }}{{ put_exec_form.quantity.label() }}</div></div>
                                     <div class="col"><div data-mdb-input-init class="form-outline">{{ put_exec_form.limit_price(class="form-control") }}{{ put_exec_form.limit_price.label() }}</div></div>
                                 </div>
-                                <button type="submit" name="submit_put" class="btn btn-danger btn-sm mt-3">Execute Put Spread</button>
+                                <button type="submit" name="submit_put" class="btn btn-success btn-sm mt-3">Approve & Execute Put Spread</button>
                             </form>
                         {% else %}
                             <p class="text-muted mt-4">Could not determine a valid Put Credit Spread based on the rules.</p>
@@ -56,7 +66,7 @@
                 </div>
             </div>
 
-            <div class="col-md-6">
+            <div class="col-lg-6">
                 <div class="card h-100">
                     <div class="card-body text-center">
                         <h5 class="card-title">Proposed Call Credit Spread</h5>
@@ -78,7 +88,7 @@
                                     <div class="col"><div data-mdb-input-init class="form-outline">{{ call_exec_form.quantity(class="form-control") }}{{ call_exec_form.quantity.label() }}</div></div>
                                     <div class="col"><div data-mdb-input-init class="form-outline">{{ call_exec_form.limit_price(class="form-control") }}{{ call_exec_form.limit_price.label() }}</div></div>
                                 </div>
-                                <button type="submit" name="submit_call" class="btn btn-success btn-sm mt-3">Execute Call Spread</button>
+                                <button type="submit" name="submit_call" class="btn btn-success btn-sm mt-3">Approve & Execute Call Spread</button>
                             </form>
                         {% else %}
                             <p class="text-muted mt-4">Could not determine a valid Call Credit Spread based on the rules.</p>

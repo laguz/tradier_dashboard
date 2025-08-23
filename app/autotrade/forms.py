@@ -1,10 +1,11 @@
 from flask_wtf import FlaskForm
-from wtforms import SubmitField, HiddenField, IntegerField, DecimalField
+from wtforms import StringField, SubmitField, HiddenField, IntegerField, DecimalField
 from wtforms.validators import DataRequired, NumberRange
 
 class AutoTradeForm(FlaskForm):
     """Form to trigger the automated trade analysis."""
-    submit = SubmitField('Find TSLA Spreads')
+    symbol = StringField('Stock Symbol', validators=[DataRequired()], default='TSLA')
+    submit = SubmitField('Find Spreads')
 
 class ExecuteTradeForm(FlaskForm):
     """

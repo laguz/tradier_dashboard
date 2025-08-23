@@ -13,6 +13,121 @@ def round_to_nearest_five(price):
     """Rounds a given price to the nearest number ending in 0 or 5."""
     return round(price / 5) * 5
 
+def execute_put_spread(api, trade_details):
+    """Places a put credit spread order."""
+    short_put_symbol = generate_occ_symbol(trade_details['symbol'], trade_details['expiration'], 'put', trade_details['put_spread']['sell_strike'])
+    long_put_symbol = generate_occ_symbol(trade_details['symbol'], trade_details['expiration'], 'put', trade_details['put_spread']['buy_strike'])
+    
+    payload = {
+        'class': 'multileg', 'symbol': trade_details['symbol'].upper(), 'type': 'credit', 'duration': 'day',
+        'price': '0.10', # Defaulting to a safe, low credit to ensure execution for auto-trading
+        'option_symbol[0]': short_put_symbol, 'side[0]': 'sell_to_open', 'quantity[0]': '1',
+        'option_symbol[1]': long_put_symbol, 'side[1]': 'buy_to_open', 'quantity[1]': '1'
+    }
+    response = api.place_order(payload)
+    if response and response.get('order'):
+        flash('Automatic Put Credit Spread order submitted successfully!', 'success')
+    else:
+        flash(f"Automatic Put Credit Spread order failed: {response.get('errors', 'Unknown error')}", 'danger')
+
+def execute_call_spread(api, trade_details):
+    """Places a call credit spread order."""
+    short_call_symbol = generate_occ_symbol(trade_details['symbol'], trade_details['expiration'], 'call', trade_details['call_spread']['sell_strike'])
+    long_call_symbol = generate_occ_symbol(trade_details['symbol'], trade_details['expiration'], 'call', trade_details['call_spread']['buy_strike'])
+
+    payload = {
+        'class': 'multileg', 'symbol': trade_details['symbol'].upper(), 'type': 'credit', 'duration': 'day',
+        'price': '0.10', # Defaulting to a safe, low credit
+        'option_symbol[0]': short_call_symbol, 'side[0]': 'sell_to_open', 'quantity[0]': '1',
+        'option_symbol[1]': long_call_symbol, 'side[1]': 'buy_to_open', 'quantity[1]': '1'
+    }
+    response = api.place_order(payload)
+    if response and response.get('order'):
+        flash('Automatic Call Credit Spread order submitted successfully!', 'success')
+    else:
+        flash(f"Automatic Call Credit Spread order failed: {response.get('errors', 'Unknown error')}", 'danger')
+
+
+@autotrade.route('/autotrade', methods=['GET', 'POST'])
+@login_required
+def autotrade_page():
+    form = AutoTradeForm()
+    put_exec_form = ExecuteTradeForm(prefix='put')
+    call_exec_form = ExecuteTradeForm(prefix='call')
+    proposed_trades = {}
+
+    if form.validate_on_submit():
+        api = get_api_for_current_user()
+        if not api:
+            flash('Cannot perform analysis. Please check your API credentials.', 'danger')
+            return redirect(url_for('autotrade.autotrade_page'))
+        try:
+            symbol = form.symbol.data.upper()
+            quote_data = api.get_quotes([symbol])
+            current_price = quote_data['quotes']['quote']['last']
+            history_data = api.get_historical_prices(symbol)
+            day_data = history_data['history']['day']
+            stock_df = pd.DataFrame(day_data)
+            stock_df.rename(columns={'close': 'Close'}, inplace=True)
+            support, resistance = find_support_resistance(stock_df)
+            exp_data = api.get_option_expirations(symbol)
+            expirations = exp_data['expirations']['date']
+            
+            trade_details = {'symbol': symbol}
+
+            spread_width = 1 if current_price <= 101 else 5
+
+            valid_supports = [s for s in reversed(support) if s < current_price]
+            if valid_supports:
+                sell_put_strike = round_to_nearest_five(valid_supports[0])
+                buy_put_strike = sell_put_strike - spread_width # Use dynamic spread width
+                trade_details['put_spread'] = {'sell_strike': sell_put_strike, 'buy_strike': buy_put_strike}
+            
+            valid_resistances = [r for r in resistance if r > current_price]
+            if valid_resistances:
+                sell_call_strike = round_to_nearest_five(valid_resistances[0])
+                buy_call_strike = sell_call_strike + spread_width # Use dynamic spread width
+                trade_details['call_spread'] = {'sell_strike': sell_call_strike, 'buy_strike': buy_call_strike}
+
+            if len(expirations) > 3:
+                trade_details['expiration'] = expirations[3]
+            elif expirations:
+                trade_details['expiration'] = expirations[-1]
+            
+            trade_details['current_price'] = current_price
+
+            if trade_details.get('expiration'):
+                if trade_details.get('put_spread'):
+                    execute_put_spread(api, trade_details)
+                if trade_details.get('call_spread'):
+                    execute_call_spread(api, trade_details)
+
+            flash('Analysis and automatic trade execution complete.', 'success')
+            proposed_trades = trade_details
+
+        except Exception as e:
+            flash(f"An error occurred during analysis: {e}", 'danger')
+
+    return render_template('autotrade/autotrade.html', 
+                           title='AutoTrade', 
+                           form=form, 
+                           trades=proposed_trades,
+                           put_exec_form=put_exec_form,
+                           call_exec_form=call_exec_form)
+from flask import render_template, redirect, url_for, flash, Blueprint, request
+from flask_login import login_required
+
+from app.services.tradier_api import get_api_for_current_user
+from app.research.routes import find_support_resistance
+from app.trade.utils import generate_occ_symbol
+from .forms import AutoTradeForm, ExecuteTradeForm
+
+autotrade = Blueprint('autotrade', __name__)
+
+def round_to_nearest_five(price):
+    """Rounds a given price to the nearest number ending in 0 or 5."""
+    return round(price / 5) * 5
+
 @autotrade.route('/autotrade', methods=['GET', 'POST'])
 @login_required
 def autotrade_page():
@@ -80,7 +195,7 @@ def autotrade_page():
             flash('Cannot perform analysis. Please check your API credentials.', 'danger')
             return redirect(url_for('autotrade.autotrade_page'))
         try:
-            symbol = 'TSLA'
+            symbol = form.symbol.data.upper()
             quote_data = api.get_quotes([symbol])
             current_price = quote_data['quotes']['quote']['last']
             history_data = api.get_historical_prices(symbol)
@@ -91,16 +206,20 @@ def autotrade_page():
             exp_data = api.get_option_expirations(symbol)
             expirations = exp_data['expirations']['date']
             
+            proposed_trades = {'symbol': symbol}
+
+            spread_width = 1 if current_price <= 101 else 5
+
             valid_supports = [s for s in reversed(support) if s < current_price]
             if valid_supports:
                 sell_put_strike = round_to_nearest_five(valid_supports[0])
-                buy_put_strike = sell_put_strike - 5
+                buy_put_strike = sell_put_strike - spread_width
                 proposed_trades['put_spread'] = {'sell_strike': sell_put_strike, 'buy_strike': buy_put_strike}
             
             valid_resistances = [r for r in resistance if r > current_price]
             if valid_resistances:
                 sell_call_strike = round_to_nearest_five(valid_resistances[0])
-                buy_call_strike = sell_call_strike + 5
+                buy_call_strike = sell_call_strike + spread_width
                 proposed_trades['call_spread'] = {'sell_strike': sell_call_strike, 'buy_strike': buy_call_strike}
 
             if len(expirations) > 3:
@@ -110,7 +229,7 @@ def autotrade_page():
             
             proposed_trades['current_price'] = current_price
 
-            # --- NEW: Pre-populate form data ---
+            # Pre-populate execution form data
             if proposed_trades.get('expiration'):
                 # Populate Put Form
                 if proposed_trades.get('put_spread'):
@@ -129,12 +248,12 @@ def autotrade_page():
                     call_exec_form.strike_short.data = proposed_trades['call_spread']['sell_strike']
                     call_exec_form.strike_long.data = proposed_trades['call_spread']['buy_strike']
 
-            flash('Analysis complete. Review and execute the proposed trades below.', 'success')
+            flash('Analysis complete. Review and execute the proposed trades below.', 'info')
         except Exception as e:
             flash(f"An error occurred during analysis: {e}", 'danger')
 
     return render_template('autotrade/autotrade.html', 
-                           title='AutoTrade TSLA', 
+                           title='AutoTrade', 
                            form=form, 
                            trades=proposed_trades,
                            put_exec_form=put_exec_form,
