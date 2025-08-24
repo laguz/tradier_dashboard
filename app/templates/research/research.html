@@ -28,7 +28,7 @@
     </div>
     <div class="card-body">
         <div class="text-center mb-4">
-            <img src="data:image/png;base64, {{ plot_url }}" class="img-fluid shadow-1-strong" alt="Support and Resistance Chart">
+            <img src="data:image/png;base64, {{ plot_url }}" class="img-fluid shadow-1-strong rounded" alt="Support and Resistance Chart">
         </div>
         
         <div class="row">
@@ -38,12 +38,12 @@
                     <ul class="list-group list-group-light">
                         {% for level in levels.support %}
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <div><i class="fas fa-arrow-up me-2"></i>${{ level }}</div>
+                                <div><i class="material-icons me-2 text-success" style="vertical-align: middle;">trending_up</i>${{ level }}</div>
                             </li>
                         {% endfor %}
                     </ul>
                 {% else %}
-                    <p class="text-muted">No significant support levels found in this period.</p>
+                    <p class="text-muted">No significant support levels found.</p>
                 {% endif %}
             </div>
             <div class="col-md-6">
@@ -52,12 +52,12 @@
                     <ul class="list-group list-group-light">
                         {% for level in levels.resistance %}
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <div><i class="fas fa-arrow-down me-2"></i>${{ level }}</div>
+                                <div><i class="material-icons me-2 text-danger" style="vertical-align: middle;">trending_down</i>${{ level }}</div>
                             </li>
                         {% endfor %}
                     </ul>
                 {% else %}
-                    <p class="text-muted">No significant resistance levels found in this period.</p>
+                    <p class="text-muted">No significant resistance levels found.</p>
                 {% endif %}
             </div>
         </div>

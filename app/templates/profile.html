@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row d-flex justify-content-center mt-5">
-    <div class="col-md-8">
+<div class="row d-flex justify-content-center">
+    <div class="col-md-8 col-lg-7 col-xl-6">
         <div class="card">
             <div class="card-body p-4">
                 <h3 class="card-title text-center mb-4">Account Profile</h3>
 
                 <div class="mb-3">
-                    <h5>Account Information</h5>
+                    <h5 class="card-subtitle mb-2 text-muted">Account Information</h5>
                     <p class="mb-1"><strong>Username:</strong> {{ current_user.username }}</p>
                     <p class="mb-1"><strong>Email:</strong> {{ current_user.email }}</p>
                 </div>
@@ -18,8 +18,10 @@
                 <form method="POST" action="">
                     {{ form.hidden_tag() }}
                     <fieldset>
-                        <legend class="h5">Tradier API Details</legend>
-                        <p class="small text-muted">Enter your API key and account number to enable dashboard functionality. This is optional.</p>
+                        <legend class="h5 card-subtitle mb-2 text-muted">Tradier API Details</legend>
+                        <p class="small text-muted">
+                            Enter your API key and account number to enable dashboard functionality.
+                        </p>
 
                         <div class="form-outline mb-4" data-mdb-input-init>
                             {{ form.tradier_api_key(class="form-control") }}
@@ -42,7 +44,7 @@
                         {% endif %}
                         
                         <div class="d-grid">
-                             {{ form.submit(class="btn btn-primary") }}
+                             {{ form.submit(class="btn btn-primary btn-block") }}
                         </div>
                     </fieldset>
                 </form>

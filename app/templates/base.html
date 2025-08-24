@@ -1,59 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <meta http-equiv="x-ua-compatible" content="ie=edge" />
-    <title>Investment Dashboard - {% if title %}{{ title }}{% else %}Welcome{% endif %}</title>
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.2/css/all.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tradier Dashboard - {% if title %}{{ title }}{% else %}Welcome{% endif %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/5.0.0/mdb.min.css" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body class="bg-light">
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="{{ url_for('main.dashboard') if current_user.is_authenticated else url_for('auth.login') }}">
-                    <i class="fas fa-chart-line text-primary"></i>
-                    <span class="ms-1">Dashboard</span>
-                </a>
-                <div class="collapse navbar-collapse">
-                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                        {% if current_user.is_authenticated %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('main.dashboard') }}">Dashboard</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('trade.trading_page') }}">Trade</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('research.research_page') }}">Research</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('autotrade.autotrade_page') }}">AutoTrade</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('main.profile') }}">Profile</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
-                            </li>
-                        {% else %}
-                             <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
-                            </li>
-                             <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('auth.register') }}">Register</a>
-                            </li>
-                        {% endif %}
-                    </ul>
-                </div>
+<body>
+    <header class="header">
+        <div class="container-fluid d-flex align-items-center">
+            <i class="material-icons header-icon">assessment</i>
+            <span class="header-title">Tradier Dashboard</span>
+            <div class="ms-auto">
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('main.profile') }}" class="btn btn-light btn-rounded">Profile</a>
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-light btn-rounded">Logout</a>
+                {% else %}
+                <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-rounded">Login</a>
+                {% endif %}
             </div>
-        </nav>
+        </div>
     </header>
 
-    <main class="mt-4">
-        <div class="container">
+    {% if current_user.is_authenticated %}
+    <nav class="secondary-nav">
+        <div class="container-fluid">
+            <ul class="nav">
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('main.dashboard') }}">Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('trade.trading_page') }}">Trade</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('research.research_page') }}">Research</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('autotrade.autotrade_page') }}">AutoTrade</a></li>
+            </ul>
+        </div>
+    </nav>
+    {% endif %}
+
+    <main class="main-content">
+        <div class="container-fluid">
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
@@ -64,11 +52,11 @@
                     {% endfor %}
                 {% endif %}
             {% endwith %}
-            
+
             {% block content %}{% endblock %}
         </div>
     </main>
-    
+
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/5.0.0/mdb.umd.min.js"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/custom.js') }}"></script>
     {% block scripts %}{% endblock %}

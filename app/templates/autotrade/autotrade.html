@@ -10,16 +10,12 @@
         </p>
         <form method="POST" action="">
             {{ form.hidden_tag() }}
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <div data-mdb-input-init class="form-outline">
-                        {{ form.symbol(class="form-control") }}
-                        {{ form.symbol.label(class="form-label") }}
-                    </div>
+            <div class="input-group">
+                <div data-mdb-input-init class="form-outline flex-fill">
+                    {{ form.symbol(class="form-control", placeholder="e.g., SPY, QQQ") }}
+                    {{ form.symbol.label(class="form-label") }}
                 </div>
-                <div class="col-md-4">
-                    {{ form.submit(class="btn btn-primary w-100") }}
-                </div>
+                {{ form.submit(class="btn btn-primary") }}
             </div>
         </form>
     </div>
@@ -40,12 +36,12 @@
                     <div class="card-body text-center">
                         <h5 class="card-title">Proposed Put Credit Spread</h5>
                         {% if trades.put_spread %}
-                            <ul class="list-group list-group-light list-group-flush">
+                            <ul class="list-group list-group-light list-group-flush mb-3">
                                 <li class="list-group-item"><strong>Action:</strong> Sell Put Spread (Bullish)</li>
                                 <li class="list-group-item"><strong>Sell Strike (Short Leg):</strong> {{ trades.put_spread.sell_strike }}</li>
                                 <li class="list-group-item"><strong>Buy Strike (Long Leg):</strong> {{ trades.put_spread.buy_strike }}</li>
                             </ul>
-                            <form method="POST" class="mt-3">
+                            <form method="POST">
                                 {{ put_exec_form.hidden_tag() }}
                                 {{ put_exec_form.underlying_symbol }}
                                 {{ put_exec_form.expiration_date }}
@@ -53,14 +49,14 @@
                                 {{ put_exec_form.credit_debit }}
                                 {{ put_exec_form.strike_short }}
                                 {{ put_exec_form.strike_long }}
-                                <div class="row mt-3">
-                                    <div class="col"><div data-mdb-input-init class="form-outline">{{ put_exec_form.quantity(class="form-control") }}{{ put_exec_form.quantity.label() }}</div></div>
-                                    <div class="col"><div data-mdb-input-init class="form-outline">{{ put_exec_form.limit_price(class="form-control") }}{{ put_exec_form.limit_price.label() }}</div></div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3"><div data-mdb-input-init class="form-outline">{{ put_exec_form.quantity(class="form-control") }}{{ put_exec_form.quantity.label() }}</div></div>
+                                    <div class="col-md-6 mb-3"><div data-mdb-input-init class="form-outline">{{ put_exec_form.limit_price(class="form-control") }}{{ put_exec_form.limit_price.label() }}</div></div>
                                 </div>
-                                <button type="submit" name="submit_put" class="btn btn-success btn-sm mt-3">Approve & Execute Put Spread</button>
+                                <button type="submit" name="submit_put" class="btn btn-success btn-rounded">Approve & Execute Put Spread</button>
                             </form>
                         {% else %}
-                            <p class="text-muted mt-4">Could not determine a valid Put Credit Spread based on the rules.</p>
+                            <p class="text-muted mt-4">Could not determine a valid Put Credit Spread.</p>
                         {% endif %}
                     </div>
                 </div>
@@ -71,12 +67,12 @@
                     <div class="card-body text-center">
                         <h5 class="card-title">Proposed Call Credit Spread</h5>
                         {% if trades.call_spread %}
-                             <ul class="list-group list-group-light list-group-flush">
+                             <ul class="list-group list-group-light list-group-flush mb-3">
                                 <li class="list-group-item"><strong>Action:</strong> Sell Call Spread (Bearish)</li>
                                 <li class="list-group-item"><strong>Sell Strike (Short Leg):</strong> {{ trades.call_spread.sell_strike }}</li>
                                 <li class="list-group-item"><strong>Buy Strike (Long Leg):</strong> {{ trades.call_spread.buy_strike }}</li>
                             </ul>
-                             <form method="POST" class="mt-3">
+                             <form method="POST">
                                 {{ call_exec_form.hidden_tag() }}
                                 {{ call_exec_form.underlying_symbol }}
                                 {{ call_exec_form.expiration_date }}
@@ -84,14 +80,14 @@
                                 {{ call_exec_form.credit_debit }}
                                 {{ call_exec_form.strike_short }}
                                 {{ call_exec_form.strike_long }}
-                                <div class="row mt-3">
-                                    <div class="col"><div data-mdb-input-init class="form-outline">{{ call_exec_form.quantity(class="form-control") }}{{ call_exec_form.quantity.label() }}</div></div>
-                                    <div class="col"><div data-mdb-input-init class="form-outline">{{ call_exec_form.limit_price(class="form-control") }}{{ call_exec_form.limit_price.label() }}</div></div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3"><div data-mdb-input-init class="form-outline">{{ call_exec_form.quantity(class="form-control") }}{{ call_exec_form.quantity.label() }}</div></div>
+                                    <div class="col-md-6 mb-3"><div data-mdb-input-init class="form-outline">{{ call_exec_form.limit_price(class="form-control") }}{{ call_exec_form.limit_price.label() }}</div></div>
                                 </div>
-                                <button type="submit" name="submit_call" class="btn btn-success btn-sm mt-3">Approve & Execute Call Spread</button>
+                                <button type="submit" name="submit_call" class="btn btn-success btn-rounded">Approve & Execute Call Spread</button>
                             </form>
                         {% else %}
-                            <p class="text-muted mt-4">Could not determine a valid Call Credit Spread based on the rules.</p>
+                            <p class="text-muted mt-4">Could not determine a valid Call Credit Spread.</p>
                         {% endif %}
                     </div>
                 </div>

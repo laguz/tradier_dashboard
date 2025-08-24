@@ -1,0 +1,93 @@
+/* Google Font */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f5f7fa; /* Google-style light grey background */
+}
+
+/* Header Styles */
+.header {
+    background-color: #ffffff;
+    border-bottom: 1px solid #dee2e6;
+    padding: 12px 0;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1030;
+    height: 64px;
+}
+
+.header-icon {
+    color: #1a73e8; /* Google Blue */
+    font-size: 28px;
+    margin-right: 8px;
+}
+
+.header-title {
+    font-size: 22px;
+    font-weight: 500;
+    color: #5f6368; /* Google Grey */
+}
+
+/* Secondary Navigation */
+.secondary-nav {
+    padding-top: 64px; /* Height of the header */
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.secondary-nav .nav-link {
+    color: #5f6368;
+    font-weight: 500;
+    padding: 16px 20px;
+    border-bottom: 3px solid transparent;
+}
+
+.secondary-nav .nav-link:hover {
+    color: #1a73e8;
+    background-color: #f1f3f4;
+}
+
+.secondary-nav .nav-link.active {
+    color: #1a73e8;
+    border-bottom: 3px solid #1a73e8;
+}
+
+/* Main Content Area */
+.main-content {
+    padding-top: 20px;
+    padding-bottom: 40px;
+    margin-top: 120px; /* Space for both navbars */
+}
+
+/* Card Styles to match Google's Material Design */
+.card {
+    border: 1px solid #dadce0;
+    border-radius: 8px;
+    box-shadow: none;
+    transition: box-shadow .3s ease-in-out;
+}
+
+.card:hover {
+    box-shadow: 0 1px 3px 0 rgba(60,64,67,0.302), 0 4px 8px 3px rgba(60,64,67,0.149);
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dadce0;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+/* Form Styles */
+.form-outline .form-label {
+    color: #5f6368;
+}
+
+.btn-primary {
+    background-color: #1a73e8;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: #185abc;
+}
