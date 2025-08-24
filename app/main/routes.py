@@ -88,3 +88,15 @@ def profile():
         form.tradier_account_number.data = current_user.tradier_account_number
         
     return render_template('profile.html', title='Profile', form=form)
+
+@main.route('/history')
+@login_required
+def history_page():
+    # This is a placeholder. In a real application, you would fetch
+    # the order history from the Tradier API.
+    mock_history = [
+        {'date': '2023-10-26', 'symbol': 'AAPL', 'type': 'Stock', 'side': 'Buy', 'quantity': 10, 'price': 170.50, 'status': 'Filled'},
+        {'date': '2023-10-25', 'symbol': 'GOOG', 'type': 'Stock', 'side': 'Sell', 'quantity': 5, 'price': 130.20, 'status': 'Filled'},
+        {'date': '2023-10-24', 'symbol': 'TSLA', 'type': 'Option', 'side': 'Buy to Open', 'quantity': 1, 'price': 5.50, 'status': 'Filled'},
+    ]
+    return render_template('history.html', title='History', history=mock_history)
