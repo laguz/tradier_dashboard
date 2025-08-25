@@ -20,11 +20,11 @@ def handle_trade_request(form, handler_class):
 
     # Special handling for dynamically populated select fields
     if isinstance(form, (OptionOrderForm, VerticalSpreadForm, IronCondorForm)):
-        submitted_expiration = request.form.get(f'{form.prefix}-expiration_date')
+        submitted_expiration = request.form.get(f'{form._prefix}-expiration_date')
         if submitted_expiration:
             form.expiration_date.choices = [(submitted_expiration, submitted_expiration)]
     if isinstance(form, OptionOrderForm):
-        submitted_strike = request.form.get(f'{form.prefix}-strike')
+        submitted_strike = request.form.get(f'{form._prefix}-strike')
         if submitted_strike:
             form.strike.choices = [(submitted_strike, submitted_strike)]
 
