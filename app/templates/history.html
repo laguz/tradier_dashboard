@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title mb-0">Order History</h4>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="bg-light">
+                    <tr>
+                        <th>Date</th>
+                        <th>Symbol</th>
+                        <th>Type</th>
+                        <th>Side</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if history %}
+                        {% for order in history %}
+                            <tr>
+                                <td>{{ order.date }}</td>
+                                <td><strong>{{ order.symbol }}</strong></td>
+                                <td>{{ order.type }}</td>
+                                <td>{{ order.side }}</td>
+                                <td>{{ order.quantity }}</td>
+                                <td>${{ "%.2f"|format(order.price) }}</td>
+                                <td><span class="badge rounded-pill badge-success">{{ order.status }}</span></td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center">No order history found.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
