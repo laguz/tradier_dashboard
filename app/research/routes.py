@@ -98,9 +98,9 @@ def research_page():
             ax.plot(stock_df['Date'], stock_df['Close'], label=f'{symbol} Close Price', color='blue', alpha=0.8)
 
             for s_level in rounded_support:
-                ax.axhline(y=s_level, color='red', linestyle='--', linewidth=2)
+                ax.axhline(y=s_level, color='green', linestyle='--', linewidth=2)
             for r_level in rounded_resistance:
-                ax.axhline(y=r_level, color='green', linestyle='--', linewidth=2)
+                ax.axhline(y=r_level, color='red', linestyle='--', linewidth=2)
 
             ax.set_title(f'{symbol} Support & Resistance Levels (Last 185 Days)', fontsize=20)
             ax.set_xlabel('Date', fontsize=14)
@@ -109,10 +109,10 @@ def research_page():
             
             handles, labels = [], []
             if rounded_support:
-                handles.append(plt.Line2D([0], [0], color='red', linestyle='--', linewidth=2))
+                handles.append(plt.Line2D([0], [0], color='green', linestyle='--', linewidth=2))
                 labels.append('Support')
             if rounded_resistance:
-                handles.append(plt.Line2D([0], [0], color='green', linestyle='--', linewidth=2))
+                handles.append(plt.Line2D([0], [0], color='red', linestyle='--', linewidth=2))
                 labels.append('Resistance')
             handles.append(plt.Line2D([0], [0], color='blue', alpha=0.8))
             labels.append(f'{symbol} Close Price')
