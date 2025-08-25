@@ -18,16 +18,6 @@ def handle_trade_request(form, handler_class):
         flash('Cannot place order. Please check your API credentials in your profile.', 'danger')
         return redirect(url_for('trade.trading_page'))
 
-    # Special handling for dynamically populated select fields
-    if isinstance(form, (OptionOrderForm, VerticalSpreadForm, IronCondorForm)):
-        submitted_expiration = request.form.get(f'{form._prefix}-expiration_date')
-        if submitted_expiration:
-            form.expiration_date.choices = [(submitted_expiration, submitted_expiration)]
-    if isinstance(form, OptionOrderForm):
-        submitted_strike = request.form.get(f'{form._prefix}-strike')
-        if submitted_strike:
-            form.strike.choices = [(submitted_strike, submitted_strike)]
-
     if form.validate_on_submit():
         handler = handler_class(api, form)
         handler.execute_trade()

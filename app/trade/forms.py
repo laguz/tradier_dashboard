@@ -2,6 +2,15 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, IntegerField, DecimalField
 from wtforms.validators import DataRequired, NumberRange, Optional, ValidationError
 
+class UnvalidatedSelectField(SelectField):
+    """
+    A custom SelectField that skips the choice validation.
+    This is useful for fields populated dynamically by JavaScript.
+    """
+    def pre_validate(self, form):
+        # Overriding pre_validate to prevent the "Not a valid choice" error.
+        pass
+
 class StockOrderForm(FlaskForm):
     """Form for placing a stock trade order."""
     symbol = StringField('Symbol', validators=[DataRequired()])
@@ -16,8 +25,8 @@ class StockOrderForm(FlaskForm):
 class OptionOrderForm(FlaskForm):
     """Form for placing a single-leg option order."""
     underlying_symbol = StringField('Underlying Symbol', validators=[DataRequired()])
-    expiration_date = SelectField('Expiration', validators=[DataRequired()], choices=[])
-    strike = SelectField('Strike', validators=[DataRequired()], choices=[])
+    expiration_date = UnvalidatedSelectField('Expiration', validators=[DataRequired()], choices=[])
+    strike = UnvalidatedSelectField('Strike', validators=[DataRequired()], choices=[])
     option_type = SelectField('Type', choices=[('call', 'Call'), ('put', 'Put')], validators=[DataRequired()])
     side = SelectField('Side', choices=[('buy_to_open', 'Buy to Open'), ('buy_to_close', 'Buy to Close'), ('sell_to_open', 'Sell to Open'), ('sell_to_close', 'Sell to Close')], validators=[DataRequired()])
     quantity = IntegerField('Quantity (Contracts)', validators=[DataRequired(), NumberRange(min=1)])
@@ -29,7 +38,7 @@ class OptionOrderForm(FlaskForm):
 class VerticalSpreadForm(FlaskForm):
     """Form for placing a two-leg vertical spread order."""
     underlying_symbol = StringField('Underlying Symbol', validators=[DataRequired()])
-    expiration_date = SelectField('Expiration', validators=[DataRequired()], choices=[])
+    expiration_date = UnvalidatedSelectField('Expiration', validators=[DataRequired()], choices=[])
     spread_type = SelectField('Option Type', choices=[('put', 'Put Spread'), ('call', 'Call Spread')], validators=[DataRequired()])
     credit_debit = SelectField('Strategy', choices=[('credit', 'Credit (Sell Spread)'), ('debit', 'Debit (Buy Spread)')], validators=[DataRequired()])
     strike_short = DecimalField('Strike to Sell', places=2, validators=[DataRequired()])
@@ -42,7 +51,7 @@ class VerticalSpreadForm(FlaskForm):
 class IronCondorForm(FlaskForm):
     """Form for placing a four-leg iron condor order."""
     underlying_symbol = StringField('Underlying Symbol', validators=[DataRequired()])
-    expiration_date = SelectField('Expiration', validators=[DataRequired()], choices=[])
+    expiration_date = UnvalidatedSelectField('Expiration', validators=[DataRequired()], choices=[])
     long_put_strike = DecimalField('Long Put Strike', places=2, validators=[DataRequired()])
     short_put_strike = DecimalField('Short Put Strike', places=2, validators=[DataRequired()])
     short_call_strike = DecimalField('Short Call Strike', places=2, validators=[DataRequired()])
