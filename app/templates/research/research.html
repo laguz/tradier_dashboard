@@ -4,19 +4,30 @@
 <div class="card mb-4">
     <div class="card-body">
         <h4 class="card-title">Stock Research</h4>
-        <p class="card-text">Enter a stock symbol to generate a support and resistance analysis for the last 185 days.</p>
+        <p class="card-text">Enter a stock symbol and select a period to generate a support and resistance analysis.</p>
         <form method="POST" action="{{ url_for('research.research_page') }}">
             {{ form.hidden_tag() }}
-            <div class="input-group">
-                <div data-mdb-input-init class="form-outline flex-fill">
-                    {{ form.symbol(class="form-control", placeholder="e.g., AAPL, TSLA") }}
-                    {{ form.symbol.label(class="form-label") }}
+            <div class="row align-items-end">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <div data-mdb-input-init class="form-outline">
+                        {{ form.symbol(class="form-control") }}
+                        {{ form.symbol.label(class="form-label") }}
+                    </div>
+                    {% for error in form.symbol.errors %}
+                        <div class="text-danger small ms-1 mt-2">{{ error }}</div>
+                    {% endfor %}
                 </div>
-                {{ form.submit(class="btn btn-primary") }}
+                <div class="col-md-4 mb-3 mb-md-0">
+                    {{ form.period.label(class="form-label") }}
+                    {{ form.period(class="form-select") }}
+                    {% for error in form.period.errors %}
+                        <div class="text-danger small ms-1 mt-2">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <div class="col-md-2">
+                    {{ form.submit(class="btn btn-primary w-100") }}
+                </div>
             </div>
-            {% for error in form.symbol.errors %}
-                <div class="text-danger small ms-1 mt-2">{{ error }}</div>
-            {% endfor %}
         </form>
     </div>
 </div>

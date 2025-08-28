@@ -66,6 +66,7 @@ def research_page():
 
     if form.validate_on_submit():
         symbol = form.symbol.data.upper()
+        period = form.period.data
         api = get_api_for_current_user() # Get the user's API client
         if not api:
             flash('Cannot fetch data. Please check your API credentials in your profile.', 'danger')
@@ -73,7 +74,7 @@ def research_page():
 
         try:
             # --- UPDATED DATA FETCHING LOGIC ---
-            history_data = api.get_historical_prices(symbol)
+            history_data = api.get_historical_prices(symbol, period_days=period)
             if not history_data or not history_data.get('history') or history_data['history'] == 'null':
                  raise ValueError(f"No historical data found for the symbol '{symbol}'.")
             
@@ -102,7 +103,7 @@ def research_page():
             for r_level in rounded_resistance:
                 ax.axhline(y=r_level, color='red', linestyle='--', linewidth=2)
 
-            ax.set_title(f'{symbol} Support & Resistance Levels (Last 185 Days)', fontsize=20)
+            ax.set_title(f'{symbol} Support & Resistance Levels (Last {period} Days)', fontsize=20)
             ax.set_xlabel('Date', fontsize=14)
             ax.set_ylabel('Price (USD)', fontsize=14)
             ax.grid(True)
