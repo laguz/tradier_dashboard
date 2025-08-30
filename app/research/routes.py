@@ -1,16 +1,13 @@
-import base64
-import io
+import json
 import pandas as pd
 import numpy as np
 import traceback
 from collections import Counter
+import plotly.graph_objects as go
+import plotly.io as pio
 
-# Configure matplotlib for a non-GUI backend
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
 
-from flask import render_template, Blueprint, flash
+from flask import render_template, Blueprint, flash, url_for, redirect
 from flask_login import login_required
 from .forms import ResearchForm
 # Import the api service to get the current user's api key
@@ -61,30 +58,26 @@ def find_support_resistance(data, window=10):
 @login_required
 def research_page():
     form = ResearchForm()
-    plot_url = None
+    plot_json = None
     levels = {}
 
     if form.validate_on_submit():
         symbol = form.symbol.data.upper()
         period = form.period.data
-        api = get_api_for_current_user() # Get the user's API client
+        api = get_api_for_current_user()
         if not api:
             flash('Cannot fetch data. Please check your API credentials in your profile.', 'danger')
             return redirect(url_for('research.research_page'))
 
         try:
-            # --- UPDATED DATA FETCHING LOGIC ---
             history_data = api.get_historical_prices(symbol, period_days=period)
             if not history_data or not history_data.get('history') or history_data['history'] == 'null':
-                 raise ValueError(f"No historical data found for the symbol '{symbol}'.")
-            
-            # Convert Tradier's data into a Pandas DataFrame
+                raise ValueError(f"No historical data found for the symbol '{symbol}'.")
+
             day_data = history_data['history']['day']
             stock_df = pd.DataFrame(day_data)
             stock_df['date'] = pd.to_datetime(stock_df['date'])
-            # Rename columns to match the old format for the analysis function
             stock_df.rename(columns={'date': 'Date', 'close': 'Close'}, inplace=True)
-            # --- END OF UPDATED LOGIC ---
 
             support, resistance = find_support_resistance(stock_df)
             rounded_support = list(dict.fromkeys([custom_round(s) for s in support]))
@@ -92,47 +85,48 @@ def research_page():
 
             levels['support'] = rounded_support
             levels['resistance'] = rounded_resistance
-
-            plt.style.use('fivethirtyeight')
-            fig, ax = plt.subplots(figsize=(15, 8))
             
-            ax.plot(stock_df['Date'], stock_df['Close'], label=f'{symbol} Close Price', color='blue', alpha=0.8)
+            fig = go.Figure()
 
+            # Add the main stock price trace
+            fig.add_trace(go.Scatter(x=stock_df['Date'], y=stock_df['Close'], mode='lines',
+                                     name=f'{symbol} Close Price', line=dict(color='blue')))
+
+            # Add support levels
             for s_level in rounded_support:
-                ax.axhline(y=s_level, color='green', linestyle='--', linewidth=2)
+                fig.add_shape(type="line", x0=stock_df['Date'].min(), y0=s_level,
+                              x1=stock_df['Date'].max(), y1=s_level,
+                              line=dict(color="green", width=2, dash="dash"), name='Support')
+
+            # Add resistance levels
             for r_level in rounded_resistance:
-                ax.axhline(y=r_level, color='red', linestyle='--', linewidth=2)
-
-            ax.set_title(f'{symbol} Support & Resistance Levels (Last {period} Days)', fontsize=20)
-            ax.set_xlabel('Date', fontsize=14)
-            ax.set_ylabel('Price (USD)', fontsize=14)
-            ax.grid(True)
+                fig.add_shape(type="line", x0=stock_df['Date'].min(), y0=r_level,
+                              x1=stock_df['Date'].max(), y1=r_level,
+                              line=dict(color="red", width=2, dash="dash"), name='Resistance')
             
-            handles, labels = [], []
-            if rounded_support:
-                handles.append(plt.Line2D([0], [0], color='green', linestyle='--', linewidth=2))
-                labels.append('Support')
-            if rounded_resistance:
-                handles.append(plt.Line2D([0], [0], color='red', linestyle='--', linewidth=2))
-                labels.append('Resistance')
-            handles.append(plt.Line2D([0], [0], color='blue', alpha=0.8))
-            labels.append(f'{symbol} Close Price')
-            ax.legend(handles, labels, loc='best')
+            fig.update_layout(
+                title=f'{symbol} Support & Resistance Levels (Last {period} Days)',
+                xaxis_title='Date',
+                yaxis_title='Price (USD)',
+                template='plotly_white',
+                height=800,
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                shapes=[
+                    dict(type='line', yref='y', y0=s, x0=stock_df['Date'].min(), x1=stock_df['Date'].max(), line=dict(color='green', dash='dash')) for s in rounded_support
+                ] + [
+                    dict(type='line', yref='y', y0=r, x0=stock_df['Date'].min(), x1=stock_df['Date'].max(), line=dict(color='red', dash='dash')) for r in rounded_resistance
+                ]
+            )
 
-            plt.tight_layout()
+            plot_json = pio.to_json(fig)
 
-            img = io.BytesIO()
-            fig.savefig(img, format='png')
-            img.seek(0)
-            plot_url = base64.b64encode(img.getvalue()).decode('utf8')
-            plt.close(fig)
 
         except Exception as e:
-            # ... (Error handling is unchanged) ...
             flash(f"An error occurred during analysis for {symbol}. Error: {e}", 'danger')
+            traceback.print_exc()
 
-    return render_template('research/research.html', 
-                           title='Research', 
-                           form=form, 
-                           plot_url=plot_url,
+    return render_template('research/research.html',
+                           title='Research',
+                           form=form,
+                           plot_json=plot_json,
                            levels=levels)
