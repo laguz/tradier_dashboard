@@ -78,6 +78,7 @@ def research_page():
             stock_df = pd.DataFrame(day_data)
             stock_df['date'] = pd.to_datetime(stock_df['date'])
             stock_df.rename(columns={'date': 'Date', 'close': 'Close'}, inplace=True)
+            stock_df['Close'] = pd.to_numeric(stock_df['Close'])
 
             support, resistance = find_support_resistance(stock_df)
             rounded_support = list(dict.fromkeys([custom_round(s) for s in support]))
